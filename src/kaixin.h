@@ -11,6 +11,8 @@
  *
  **************************************************************************************************/
 #pragma once
+#include <time.h>
+
 #ifdef KAIXIN_EXPORTS
 #ifdef _MSC_VER
 #define KAIXIN_API      __declspec(dllexport)
@@ -48,6 +50,17 @@ KAIXIN_API int kaixin_initialize(const char *app_key, const char *app_secret, co
  * \brief       反初始化开心 SDK。
  */
 KAIXIN_API void kaixin_uninitialize();
+
+
+/*!
+ * \brief       登录。
+ *
+ * \param[in]   username        用户名
+ * \param[in]   password        密码，明文
+ *
+ * \return      如果成功，则返回零；否则返回非零。
+ */
+KAIXIN_API int kaixin_sign_in(const char *username, const char *password);
 
 
 #ifdef __cplusplus
