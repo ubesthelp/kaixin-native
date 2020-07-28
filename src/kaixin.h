@@ -31,7 +31,7 @@ extern "C" {
 
 
 /*!
- * \brief       初始化开心 SDK。
+ * \brief       初始化开心 SDK。在调用其它 API 前必须调用此函数。
  *
  * \param[in]   app_key         APP KEY
  * \param[in]   app_secret      APP SECRET
@@ -41,6 +41,13 @@ extern "C" {
  * \return      如果成功，则返回零；否则返回非零。
  */
 KAIXIN_API int kaixin_initialize(const char *app_key, const char *app_secret, const char *base_url);
+
+
+
+/*!
+ * \brief       反初始化开心 SDK。
+ */
+KAIXIN_API void kaixin_uninitialize();
 
 
 #ifdef __cplusplus

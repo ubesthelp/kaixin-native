@@ -1,23 +1,23 @@
-﻿#*! ***********************************************************************************************
+﻿###################################################################################################
 #
 # \file        CMakeLists.txt
-# \brief       Project Shameless 主 CMakeLists。
+# \brief       开心 C SDK 主 CMakeLists。
 #
 # \version     0.1
-# \date        2018/1/30
+# \date        2020-7-28
 #
 # \author      Roy QIU <karoyqiu@gmail.com>
-# \copyright   © 2018 Roy QIU。
+# \copyright   © 2020 开心网络。
 #
-#*************************************************************************************************/
+###################################################################################################
 cmake_minimum_required(VERSION 3.16)
 
 # 设置全局变量
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 set(CMAKE_C_VISIBILITY_PRESET "hidden")
 set(CMAKE_CXX_VISIBILITY_PRESET "hidden")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 #set(CMAKE_POLICY_DEFAULT_CMP0001 NEW)
 #set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
 #set(CMAKE_POLICY_DEFAULT_CMP0054 NEW)
@@ -35,7 +35,7 @@ set(CMAKE_BUILD_TYPE Debug CACHE STRING
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS Debug Release)
 set(VCPKG_TARGET_TRIPLET $ENV{VCPKG_DEFAULT_TRIPLET} CACHE STRING "VCPKG Target Triplet to use")
 
-# Project Shameless
+# 开心 C SDK
 project(kaixin VERSION 0.0.1)
 
 # 检查是否支持 IPO
