@@ -15,6 +15,7 @@
 set(target kaixin)
 add_library(${target} SHARED
     kaixin.h kaixin.cpp
+    rapidjsonhelpers.h
 )
 
 # 查找依赖库
@@ -29,6 +30,7 @@ find_library(IXWEBSOCKET_LIBRARY ixwebsocket)
 set_target_properties(${target} PROPERTIES
     DEFINE_SYMBOL "KAIXIN_EXPORTS"
 )
+target_compile_features(${target} PRIVATE cxx_std_17)
 target_compile_definitions(${target} PRIVATE "RAPIDJSON_HAS_STDSTRING=1")
 target_include_directories(${target} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
     PRIVATE ${RAPIDJSON_INCLUDE_DIRS} ${IXWEBSOCKET_INCLUDE_DIR}
