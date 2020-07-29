@@ -16,6 +16,7 @@ set(target kaixin)
 add_library(${target} SHARED
     kaixin.h kaixin.cpp
     rapidjsonhelpers.h
+    utils.h utils.cpp
 )
 
 # 查找依赖库

@@ -12,12 +12,16 @@
  **************************************************************************************************/
 #include "kaixin.h"
 
+#include <chrono>
 #include <functional>
 #include <sstream>
+
+#include <mbedtls/md.h>
 #include <ixwebsocket/IXHttpClient.h>
 #include <ixwebsocket/IXNetSystem.h>
 
 #include "rapidjsonhelpers.h"
+#include "utils.h"
 
  // 纠正 EINVAL 被重定义为 WSAEINVAL 的问题。
 #ifdef WIN32
@@ -25,9 +29,6 @@
 #define EINVAL 22
 #endif
 
-
-// 字符串到字符串的映射
-using string_map = ix::WebSocketHttpHeaders;
 
 // 响应数据处理函数类型
 using response_data_handler = std::function<int(const rapidjson::Value &)>;
@@ -47,73 +48,40 @@ struct Config
 
 static Config *g_config = nullptr;
 
-// 判断字符串是否为空
-static inline bool is_empty(const char *s)
-{
-    return s == nullptr || strlen(s) == 0;
-}
 
-// 连接字符串
-template <typename Range, typename Value = typename Range::value_type>
-static std::string join(Range const &elements, const char *const delimiter)
+// 计算签名
+static std::string sign(const std::string &verb, const std::string &path, const string_map &queries,
+                        const string_map &form)
 {
-    std::ostringstream os;
-    auto b = std::begin(elements), e = end(elements);
+    // 签名字符串：请求方法 + 路径
+    std::string sts = verb + path;
 
-    if (b != e)
+    // 所有请求参数（查询 + 表单）合并排序
+    string_map params = queries;
+    params.insert(form.begin(), form.end());
+
+    // + 参数名称 + 参数值
+    for (const auto &[key, value] : params)
     {
-        std::copy(b, std::prev(e), std::ostream_iterator<Value>(os, delimiter));
-        b = std::prev(e);
+        sts += url_encode(key) + url_encode(value);
     }
 
-    if (b != e)
+    // 计算 HMAC SHA256
+    auto *md = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
+    auto *input = reinterpret_cast<const uint8_t *>(sts.c_str());
+    auto *key = reinterpret_cast<const uint8_t *>(g_config->app_secret.c_str());
+    uint8_t output[MBEDTLS_MD_MAX_SIZE] = { 0 };
+    auto ret = mbedtls_md_hmac(md, key, g_config->app_secret.length(), input, sts.length(), output);
+
+    if (ret != 0)
     {
-        os << *b;
-    }
-
-    return os.str();
-}
-
-// 根据查询映射生成表单字符串
-static std::string make_form(const string_map &queries)
-{
-    static ix::HttpClient http;
-
-    if (queries.empty())
-    {
+        // 计算出错
         return {};
     }
 
-    std::vector<std::string> form;
-    form.reserve(queries.size());
-
-    for (const auto &[key, value] : queries)
-    {
-        form.emplace_back(http.urlEncode(key + '=' + value));
-    }
-
-    return join(form, "&");
+    return to_hex(output, mbedtls_md_get_size(md));
 }
 
-// 根据高 16 位和低 16 位拼成 32 位整数
-static inline int make_int(int upper, int lower)
-{
-    return static_cast<int>((static_cast<uint32_t>(upper & 0xffff) << 16) | (lower & 0xffff));
-}
-
-// 根据路径和查询映射生成完整 URL
-static std::string make_url(const std::string &path, const string_map &queries)
-{
-    auto url = g_config->base_url;
-    url += path;
-
-    if (!queries.empty())
-    {
-        url += '?' + make_form(queries);
-    }
-
-    return url;
-}
 
 // 同步发送请求并返回结果
 static int send_request(const std::string &verb, const std::string &path, const string_map &queries,
@@ -121,8 +89,15 @@ static int send_request(const std::string &verb, const std::string &path, const 
 {
     assert(!verb.empty() && !path.empty() && path.at(0) == '/' && !!handler);
 
+    // 设置公共参数：k、t、z，并签名
+    string_map params = queries;
+    params.emplace("k", g_config->app_key);
+    params.emplace("t", std::to_string(timestamp()));
+    params.emplace("z", generate_random_hex_string(16));
+    params.emplace("s", sign(verb, path, params, form));
+
     // 构造 URL
-    auto url = make_url(path, queries);
+    auto url = make_url(g_config->base_url, path, params);
 
     ix::HttpClient http;
     auto args = http.createRequest();
@@ -208,10 +183,22 @@ void kaixin_uninitialize()
 // 登录
 static int sign_in_handler(const rapidjson::Value &data)
 {
+    using rapidjson::get;
+    auto now = time(nullptr);
+    get(g_config->access_token, data, "access_token");
+    get(g_config->refresh_token, data, "refresh_token");
+    get(g_config->id_token, data, "id_token");
+    g_config->expires_at = now + get<int>(data, "expires_in");
+    g_config->refresh_token_expires_at = now + get<int>(data, "refresh_token_expires_in");
     return 0;
 }
 
 int kaixin_sign_in(const char *username, const char *password)
 {
-    return send_request(ix::HttpClient::kPost, "/session", {}, {}, sign_in_handler);
+    string_map form{
+        { "username", username },
+        { "password", password }
+    };
+
+    return send_request(ix::HttpClient::kPost, "/session", {}, form, sign_in_handler);
 }
