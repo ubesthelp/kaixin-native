@@ -11,6 +11,8 @@
  *
  **************************************************************************************************/
 #pragma once
+#include <time.h>
+
 #ifdef KAIXIN_EXPORTS
 #ifdef _MSC_VER
 #define KAIXIN_API      __declspec(dllexport)
@@ -31,6 +33,30 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+
+/// \brief      用户状态。
+typedef enum kaixin_user_status_e
+{
+    KAIXIN_INVALID_USER = 0,                    ///< 无效用户
+    KAIXIN_PASSWORD_CONFIRMED = 2               ///< 用户密码已确认
+} kaixin_user_status_t;
+
+
+/// \brief      用户配置，登录成功后获取。
+typedef struct kaixin_profile_s
+{
+    const char *access_token;                   ///< 访问令牌
+    const char *refresh_token;                  ///< 更新令牌，需要保存到本地
+    const char *id_token;                       ///< 身份令牌，需要保存到本地，JWT 格式
+    const char *username;                       ///< 用户名
+    const char *email;                          ///< 电子邮箱
+    const char *invitation_code;                ///< 邀请码（上级代理编号）
+    time_t access_token_expires_at;             ///< 访问令牌过期时间
+    time_t refresh_token_expires_at;            ///< 更新令牌过期时间
+    time_t id_token_expires_at;                 ///< 身份令牌过期时间
+    kaixin_user_status_t status;                ///< 用户状态
+} kaixin_profile_t;
 
 
 /*!
@@ -62,6 +88,14 @@ KAIXIN_API void kaixin_uninitialize();
  * \return      如果成功，则返回零；否则返回非零。
  */
 KAIXIN_API int kaixin_sign_in(const char *username, const char *password);
+
+
+/*!
+ * \brief       获取用户配置。
+ *
+ * \return      如果登录成功，则返回用户配置文件；否则返回 `NULL`。
+ */
+KAIXIN_API const kaixin_profile_t *kaixin_get_profile();
 
 
 #ifdef __cplusplus

@@ -47,6 +47,7 @@ struct Config
 };
 
 static Config *g_config = nullptr;
+static kaixin_profile_t *g_profile = nullptr;
 
 
 // 计算签名
@@ -189,6 +190,10 @@ int kaixin_initialize(const char *app_key, const char *app_secret, const char *b
 void kaixin_uninitialize()
 {
     ix::uninitNetSystem();
+
+    delete g_profile;
+    g_profile = nullptr;
+
     delete g_config;
     g_config = nullptr;
 }
@@ -204,6 +209,15 @@ static int sign_in_handler(const rapidjson::Value &data)
     get(g_config->id_token, data, "id_token");
     g_config->expires_at = now + get<int>(data, "expires_in");
     g_config->refresh_token_expires_at = now + get<int>(data, "refresh_token_expires_in");
+
+    assert(g_profile == nullptr);
+    g_profile = new kaixin_profile_t;
+    memset(g_profile, 0, sizeof(kaixin_profile_t));
+    g_profile->access_token = g_config->access_token.c_str();
+    g_profile->refresh_token = g_config->refresh_token.c_str();
+    g_profile->id_token = g_config->id_token.c_str();
+    g_profile->access_token_expires_at = g_config->expires_at;
+    g_profile->refresh_token_expires_at = g_config->refresh_token_expires_at;
     return 0;
 }
 
@@ -215,4 +229,10 @@ int kaixin_sign_in(const char *username, const char *password)
     };
 
     return send_request(ix::HttpClient::kPost, "/session", {}, form, sign_in_handler);
+}
+
+
+const kaixin_profile_t *kaixin_get_profile()
+{
+    return g_profile;
 }
