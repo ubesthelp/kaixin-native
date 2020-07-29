@@ -44,15 +44,4 @@ target_link_libraries(${target} PRIVATE
     IXWebSocket
 )
 
-# Windows 特殊设置
-if(WIN32)
-    target_compile_definitions(${target} PRIVATE "WIN32_LEAN_AND_MEAN")
-    target_link_libraries(${target} PRIVATE
-        ws2_32.lib
-    )
-endif()
-
-# MSVC 特殊设置
-if(MSVC)
-    target_compile_options(${target} PRIVATE ${PROJECT_WARNING_FLAGS} "/utf-8")
-endif()
+common_config(${target})

@@ -16,19 +16,13 @@ cmake_minimum_required(VERSION 3.16)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 set(CMAKE_C_VISIBILITY_PRESET "hidden")
 set(CMAKE_CXX_VISIBILITY_PRESET "hidden")
-#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
-#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
-#set(CMAKE_POLICY_DEFAULT_CMP0001 NEW)
-#set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
-#set(CMAKE_POLICY_DEFAULT_CMP0054 NEW)
-#set(CMAKE_POLICY_DEFAULT_CMP0063 NEW)
-#set(CMAKE_POLICY_DEFAULT_CMP0069 NEW)
-#set(CMAKE_POLICY_DEFAULT_CMP0074 NEW)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
 set(CMAKE_SKIP_BUILD_RPATH OFF)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH OFF)
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS OFF)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
 set(CMAKE_BUILD_TYPE Debug CACHE STRING
     "Choose the type of build, options are: Debug Release.")
@@ -69,7 +63,25 @@ check_warning_flags(PROJECT_WARNING_FLAGS)
 #find_package(Themida REQUIRED)
 
 # 源代码
+function(common_config target)
+    target_compile_options(${target} PRIVATE ${PROJECT_WARNING_FLAGS})
+
+    # Windows 特殊设置
+    if(WIN32)
+        target_compile_definitions(${target} PRIVATE "WIN32_LEAN_AND_MEAN")
+        target_link_libraries(${target} PRIVATE
+            ws2_32.lib
+        )
+    endif()
+
+    # MSVC 特殊设置
+    if(MSVC)
+        target_compile_options(${target} PRIVATE "/utf-8")
+    endif()
+endfunction()
+
 add_subdirectory("src")
+add_subdirectory("example")
 
 # 打包，提前设置供安装库使用。
 set(CPACK_PACKAGE_NAME "${PROJECT_NAME}-all")

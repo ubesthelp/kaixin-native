@@ -11,8 +11,6 @@
  *
  **************************************************************************************************/
 #pragma once
-#include <time.h>
-
 #ifdef KAIXIN_EXPORTS
 #ifdef _MSC_VER
 #define KAIXIN_API      __declspec(dllexport)
@@ -26,6 +24,9 @@
 #define KAIXIN_API
 #endif
 #endif
+
+/// 用于测试的基础 URL。
+#define KAIXIN_BASE_URL_FOR_TESTING     "https://api-v3-test.hlwcr.cn"
 
 #ifdef __cplusplus
 extern "C" {

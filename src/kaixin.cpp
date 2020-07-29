@@ -63,7 +63,7 @@ static std::string sign(const std::string &verb, const std::string &path, const 
     // + 参数名称 + 参数值
     for (const auto &[key, value] : params)
     {
-        sts += url_encode(key) + url_encode(value);
+        sts += key + value;
     }
 
     // 计算 HMAC SHA256
@@ -164,7 +164,21 @@ int kaixin_initialize(const char *app_key, const char *app_secret, const char *b
     _ASSERT(g_config != nullptr);
     g_config->app_key = app_key;
     g_config->app_secret = app_secret;
-    g_config->base_url = base_url;
+
+    if (is_empty(base_url))
+    {
+        // TODO: 设置默认生产环境 URL
+    }
+    else
+    {
+        g_config->base_url = base_url;
+
+        if (g_config->base_url.at(g_config->base_url.length() - 1) == '/')
+        {
+            // 删除结尾处的“/”
+            g_config->base_url.erase(g_config->base_url.length() - 1, 1);
+        }
+    }
 
     ix::initNetSystem();
     return 0;
