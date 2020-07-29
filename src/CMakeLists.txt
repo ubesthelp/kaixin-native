@@ -23,8 +23,7 @@ add_library(${target} SHARED
 find_package(RapidJSON CONFIG REQUIRED)
 
 # ixwebsocket
-find_path(IXWEBSOCKET_INCLUDE_DIR ixwebsocket/IXWebSocket.h)
-find_library(IXWEBSOCKET_LIBRARY ixwebsocket)
+find_package(IXWebSocket REQUIRED)
 
 # 设置编译选项，链接依赖库
 set_target_properties(${target} PROPERTIES
@@ -41,11 +40,18 @@ target_precompile_headers(${target} PRIVATE
     "<rapidjson/document.h>"
 )
 target_link_libraries(${target} PRIVATE
-    ${IXWEBSOCKET_LIBRARY}
+    IXWebSocket
 )
+
+# Windows 特殊设置
+if(WIN32)
+    target_compile_definitions(${target} PRIVATE "WIN32_LEAN_AND_MEAN")
+    target_link_libraries(${target} PRIVATE
+        ws2_32.lib
+    )
+endif()
 
 # MSVC 特殊设置
 if(MSVC)
-    target_compile_definitions(${target} PRIVATE "WIN32_LEAN_AND_MEAN")
     target_compile_options(${target} PRIVATE ${PROJECT_WARNING_FLAGS} "/utf-8")
 endif()

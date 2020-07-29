@@ -164,6 +164,7 @@ static int send_request(const std::string &verb, const std::string &path, const 
 }
 
 
+// 初始化
 int kaixin_initialize(const char *app_key, const char *app_secret, const char *base_url)
 {
     if (g_config != nullptr)
@@ -195,6 +196,7 @@ int kaixin_initialize(const char *app_key, const char *app_secret, const char *b
 }
 
 
+// 反初始化
 void kaixin_uninitialize()
 {
     ix::uninitNetSystem();
@@ -203,6 +205,7 @@ void kaixin_uninitialize()
 }
 
 
+// 登录
 static int sign_in_handler(const rapidjson::Value &data)
 {
     return 0;
