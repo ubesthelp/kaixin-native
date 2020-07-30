@@ -15,6 +15,7 @@
 set(target kaixin)
 add_library(${target} SHARED
     kaixin.h kaixin.cpp
+    kaixin_api.h kaixin_api.cpp
     rapidjsonhelpers.h
     utils.h utils.cpp
     jwt.h jwt.cpp
@@ -40,7 +41,6 @@ target_include_directories(${target} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
     PRIVATE ${RapidJSON_INCLUDE_DIRS} ${IXWEBSOCKET_INCLUDE_DIR}
 )
 target_precompile_headers(${target} PRIVATE
-    "<openssl/bio.h>" "<openssl/evp.h>"
     "<ixwebsocket/IXHttpClient.h>" "<ixwebsocket/IXWebSocket.h>"
     "<rapidjson/document.h>"
 )

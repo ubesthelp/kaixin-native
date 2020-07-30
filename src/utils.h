@@ -15,11 +15,8 @@
 #include <sstream>
 #include <string>
 
-#include <ixwebsocket/IXWebSocketHttpHeaders.h>
 
-
-/// 字符串到字符串的映射。
-using string_map = ix::WebSocketHttpHeaders;
+namespace utils {
 
 
 /*!
@@ -114,33 +111,4 @@ std::string join(Range const &elements, const char *const delimiter)
 }
 
 
-/*!
- * \brief       URL 编码。
- *
- * \param[in]   s       要编码的字符串
- *
- * \return      编码后的字符串。
- */
-std::string url_encode(const std::string &s);
-
-
-/*!
- * \brief       根据查询映射生成表单字符串（application/x-www-form-urlencoded）。
- *
- * \param[in]   queries         查询键值映射
- *
- * \return      表单字符串。
- */
-std::string make_form(const string_map &queries);
-
-
-/*!
- * \brief       生成完整 URL。
- *
- * \param[in]   base_url        基础 URL
- * \param[in]   path            路径
- * \param[in]   queries         查询键值映射
- *
- * \return      完整 URL。
- */
-std::string make_url(const std::string &base_url, const std::string &path, const string_map &queries);
+}       // namespace utils
