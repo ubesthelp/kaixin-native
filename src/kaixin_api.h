@@ -93,7 +93,7 @@ std::string make_url(const std::string &base_url, const std::string &path, const
  * \return      如果成功，则返回零；否则返回非零。
  */
 int send_request(const std::string &verb, const std::string &path, const string_map &queries,
-                 const string_map &form, const response_data_handler &handler);
+                 const string_map &form, const response_data_handler &handler = {});
 
 
 /*!
@@ -107,7 +107,7 @@ int send_request(const std::string &verb, const std::string &path, const string_
  * \return      如果成功，则返回零；否则返回非零。
  */
 inline int send_request(const std::string &verb, const std::string &path, const string_map &form,
-                        const response_data_handler &handler)
+                        const response_data_handler &handler = {})
 {
     return send_request(verb, path, {}, form, handler);
 }
@@ -123,7 +123,7 @@ inline int send_request(const std::string &verb, const std::string &path, const 
  * \return      如果成功，则返回零；否则返回非零。
  */
 inline int send_request(const std::string &verb, const std::string &path,
-                        const response_data_handler &handler)
+                        const response_data_handler &handler = {})
 {
     return send_request(verb, path, {}, handler);
 }

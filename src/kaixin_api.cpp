@@ -149,7 +149,12 @@ int send_request(const std::string &verb, const std::string &path, const string_
         return utils::make_int(resp->statusCode, get(doc, "code"));
     }
 
-    return handler(doc["data"]);
+    if (handler)
+    {
+        return handler(doc["data"]);
+    }
+
+    return 0;
 }
 
 
