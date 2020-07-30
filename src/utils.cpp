@@ -15,42 +15,15 @@
 #include <iomanip>
 #include <sstream>
 
-#include <mbedtls/ctr_drbg.h>
-#include <mbedtls/entropy.h>
-
+#include <openssl/rand.h>
 #include <ixwebsocket/IXHttpClient.h>
 
 
 std::string generate_random_hex_string(size_t length)
 {
-    std::string hex;
-    mbedtls_entropy_context entropy;
-    mbedtls_ctr_drbg_context ctr_drbg;
-    mbedtls_entropy_init(&entropy);
-    mbedtls_ctr_drbg_init(&ctr_drbg);
-
-    do
-    {
-        if (mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy, nullptr, 0) != 0)
-        {
-            // 初始化种子错误？
-            break;
-        }
-
-        std::unique_ptr<uint8_t[]> bytes(new uint8_t[length]);
-
-        if (mbedtls_ctr_drbg_random(&ctr_drbg, bytes.get(), length) != 0)
-        {
-            // 生成数据错误
-            break;
-        }
-
-        hex = to_hex(bytes.get(), length);
-    } while (false);
-
-    mbedtls_ctr_drbg_free(&ctr_drbg);
-    mbedtls_entropy_free(&entropy);
-    return hex;
+    std::unique_ptr<uint8_t[]> bytes(new uint8_t[length]);
+    RAND_pseudo_bytes(bytes.get(), length);
+    return to_hex(bytes.get(), length);
 }
 
 

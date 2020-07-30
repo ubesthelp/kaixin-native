@@ -11,12 +11,13 @@
  *
  **************************************************************************************************/
 #include <iostream>
+#include <string>
 
 #include "appkey.h"         // For APP_KEY, APP_SECRET
 #include "kaixin.h"
 
 
-int main(int argc, char *argv[])
+int main()
 {
     do
     {

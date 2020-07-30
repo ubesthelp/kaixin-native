@@ -16,7 +16,7 @@
 #include <functional>
 #include <sstream>
 
-#include <mbedtls/md.h>
+#include <openssl/hmac.h>
 #include <ixwebsocket/IXHttpClient.h>
 #include <ixwebsocket/IXNetSystem.h>
 
@@ -68,19 +68,20 @@ static std::string sign(const std::string &verb, const std::string &path, const 
     }
 
     // 计算 HMAC SHA256
-    auto *md = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
     auto *input = reinterpret_cast<const uint8_t *>(sts.c_str());
     auto *key = reinterpret_cast<const uint8_t *>(g_config->app_secret.c_str());
-    uint8_t output[MBEDTLS_MD_MAX_SIZE] = { 0 };
-    auto ret = mbedtls_md_hmac(md, key, g_config->app_secret.length(), input, sts.length(), output);
+    uint8_t output[EVP_MAX_MD_SIZE] = { 0 };
+    unsigned int output_length = EVP_MAX_MD_SIZE;
+    auto *p = HMAC(EVP_sha256(), key, g_config->app_secret.length(), input, sts.length(), output,
+                   &output_length);
 
-    if (ret != 0)
+    if (p == nullptr)
     {
         // 计算出错
         return {};
     }
 
-    return to_hex(output, mbedtls_md_get_size(md));
+    return to_hex(output, output_length);
 }
 
 
