@@ -20,6 +20,7 @@
 #include <ixwebsocket/IXHttpClient.h>
 #include <ixwebsocket/IXNetSystem.h>
 
+#include "jwt.h"
 #include "rapidjsonhelpers.h"
 #include "utils.h"
 
@@ -42,7 +43,11 @@ struct Config
     std::string access_token;       // 访问令牌
     std::string refresh_token;      // 更新令牌
     std::string id_token;           // 身份令牌
-    time_t expires_at = 0;          // 访问令牌过期时间
+    std::string username;           // 用户名
+    std::string email;              // Email
+    std::string agent_code;         // 上级代理编号
+    std::string secret;             // 本地对称加密密钥
+    time_t access_token_expires_at = 0;         // 访问令牌过期时间
     time_t refresh_token_expires_at = 0;        // 更新令牌过期时间
 };
 
@@ -72,8 +77,8 @@ static std::string sign(const std::string &verb, const std::string &path, const 
     auto *key = reinterpret_cast<const uint8_t *>(g_config->app_secret.c_str());
     uint8_t output[EVP_MAX_MD_SIZE] = { 0 };
     unsigned int output_length = EVP_MAX_MD_SIZE;
-    auto *p = HMAC(EVP_sha256(), key, g_config->app_secret.length(), input, sts.length(), output,
-                   &output_length);
+    auto *p = HMAC(EVP_sha256(), key, static_cast<int>(g_config->app_secret.length()), input,
+                   sts.length(), output, &output_length);
 
     if (p == nullptr)
     {
@@ -208,8 +213,24 @@ static int sign_in_handler(const rapidjson::Value &data)
     get(g_config->access_token, data, "access_token");
     get(g_config->refresh_token, data, "refresh_token");
     get(g_config->id_token, data, "id_token");
-    g_config->expires_at = now + get<int>(data, "expires_in");
+    g_config->access_token_expires_at = now + get<int>(data, "expires_in");
     g_config->refresh_token_expires_at = now + get<int>(data, "refresh_token_expires_in");
+
+    auto payload = jwt::payload(g_config->id_token, g_config->app_key);
+
+    if (payload.empty())
+    {
+        // 身份令牌无效
+        return 1;
+    }
+
+    using rapidjson::get;
+    rapidjson::Document doc;
+    doc.ParseInsitu(payload.data());
+    get(g_config->username, doc, "sub");
+    get(g_config->email, doc, "email");
+    get(g_config->agent_code, doc, "agent_code");
+    get(g_config->secret, doc, "secret");
 
     assert(g_profile == nullptr);
     g_profile = new kaixin_profile_t;
@@ -217,8 +238,15 @@ static int sign_in_handler(const rapidjson::Value &data)
     g_profile->access_token = g_config->access_token.c_str();
     g_profile->refresh_token = g_config->refresh_token.c_str();
     g_profile->id_token = g_config->id_token.c_str();
-    g_profile->access_token_expires_at = g_config->expires_at;
+    g_profile->username = g_config->username.c_str();
+    g_profile->email = g_config->email.c_str();
+    g_profile->invitation_code = g_config->agent_code.c_str();
+    g_profile->secret = g_config->secret.c_str();
+    g_profile->access_token_expires_at = g_config->access_token_expires_at;
     g_profile->refresh_token_expires_at = g_config->refresh_token_expires_at;
+    get(g_profile->status, doc, "status");
+    get(g_profile->id_token_expires_at, doc, "exp");
+
     return 0;
 }
 
@@ -233,6 +261,7 @@ int kaixin_sign_in(const char *username, const char *password)
 }
 
 
+// 获取用户配置
 const kaixin_profile_t *kaixin_get_profile()
 {
     return g_profile;

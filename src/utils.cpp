@@ -12,32 +12,24 @@
  **************************************************************************************************/
 #include "utils.h"
 
-#include <iomanip>
-#include <sstream>
-
+#include <openssl/bio.h>
+#include <openssl/evp.h>
 #include <openssl/rand.h>
+#include <cppcodec/hex_lower.hpp>
 #include <ixwebsocket/IXHttpClient.h>
 
 
 std::string generate_random_hex_string(size_t length)
 {
     std::unique_ptr<uint8_t[]> bytes(new uint8_t[length]);
-    RAND_pseudo_bytes(bytes.get(), length);
+    RAND_pseudo_bytes(bytes.get(), static_cast<int>(length));
     return to_hex(bytes.get(), length);
 }
 
 
 std::string to_hex(const uint8_t *buffer, size_t length)
 {
-    std::ostringstream oss;
-    oss << std::hex << std::setfill('0');
-
-    for (size_t i = 0; i < length; i++)
-    {
-        oss << std::setw(2) << static_cast<int>(buffer[i]);
-    }
-
-    return oss.str();
+    return cppcodec::hex_lower::encode(buffer, length);
 }
 
 

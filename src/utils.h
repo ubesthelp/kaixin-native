@@ -12,6 +12,7 @@
  **************************************************************************************************/
 #pragma once
 #include <chrono>
+#include <sstream>
 #include <string>
 
 #include <ixwebsocket/IXWebSocketHttpHeaders.h>

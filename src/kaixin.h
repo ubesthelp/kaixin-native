@@ -52,6 +52,7 @@ typedef struct kaixin_profile_s
     const char *username;                       ///< 用户名
     const char *email;                          ///< 电子邮箱
     const char *invitation_code;                ///< 邀请码（上级代理编号）
+    const char *secret;                         ///< 本地对称加密密钥
     time_t access_token_expires_at;             ///< 访问令牌过期时间
     time_t refresh_token_expires_at;            ///< 更新令牌过期时间
     time_t id_token_expires_at;                 ///< 身份令牌过期时间
