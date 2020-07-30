@@ -20,6 +20,11 @@
           "name": "CMAKE_EXPORT_COMPILE_COMMANDS",
           "value": "True",
           "type": "BOOL"
+        },
+        {
+          "name": "KAIXIN_BUILD_INTERNAL_API",
+          "value": "True",
+          "type": "BOOL"
         }
       ]
     }

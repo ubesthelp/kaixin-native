@@ -143,6 +143,7 @@ int send_request(const std::string &verb, const std::string &path, const string_
         return -1;
     }
 
+    using rapidjson::get;
     rapidjson::Document doc;
     doc.ParseInsitu(resp->payload.data());
 
@@ -153,12 +154,12 @@ int send_request(const std::string &verb, const std::string &path, const string_
     }
 
     // 服务端错误代码
-    int code = get(doc, "code");
+    auto code = get<int>(doc, "code");
 
     if ((resp->statusCode / 100) != 2 || code != 0)
     {
         // 服务端返回错误
-        return utils::make_int(resp->statusCode, get(doc, "code"));
+        return utils::make_int(resp->statusCode, code);
     }
 
     // 如果指定了响应处理函数，则调用；否则直接返回 0

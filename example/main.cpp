@@ -30,7 +30,7 @@ int main()
 
         if (r != 0)
         {
-            std::cerr << "Failed to initialize:" << r << std::endl;
+            std::cerr << "Failed to initialize: " << r << std::endl;
             break;
         }
 
@@ -47,7 +47,7 @@ int main()
 
         if (r != 0)
         {
-            std::cerr << "Failed to sign in:" << r << std::endl;
+            std::cerr << "Failed to sign in: " << r << std::endl;
             break;
         }
 
@@ -64,7 +64,7 @@ int main()
 
             if (r != 0)
             {
-                std::cerr << "Failed to change password:" << r << std::endl;
+                std::cerr << "Failed to change password: " << r << std::endl;
                 break;
             }
         }
