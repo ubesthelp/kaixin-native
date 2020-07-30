@@ -101,18 +101,19 @@ std::string make_url(const std::string &base_url, const std::string &path, const
 
 int send_request(const std::string &verb, const std::string &path, const string_map &queries, const string_map &form, const response_data_handler &handler)
 {
-    assert(!verb.empty() && !path.empty() && path.at(0) == '/' && !!handler);
+    assert(!verb.empty() && !path.empty() && path.at(0) == '/');
 
     // 设置公共参数：k、t、z
+    auto now = utils::timestamp();
     string_map params = queries;
     params.emplace("k", g_config->app_key);
-    params.emplace("t", std::to_string(utils::timestamp()));
+    params.emplace("t", std::to_string(now));
     params.emplace("z", utils::generate_random_hex_string(16));
 
     // 如果有访问令牌，则设置 a 参数
-    auto now = time(nullptr);
+    now /= 1000;
 
-    if (!g_config->access_token.empty() && g_config->access_token_expires_at < now)
+    if (!g_config->access_token.empty() && g_config->access_token_expires_at >= now)
     {
         params.emplace("a", g_config->access_token);
     }
@@ -126,7 +127,7 @@ int send_request(const std::string &verb, const std::string &path, const string_
     ix::HttpClient http;
     auto args = http.createRequest();
 
-    if (!g_config->id_token.empty() && g_config->id_token_expires_at < now)
+    if (!g_config->id_token.empty() && g_config->id_token_expires_at >= now)
     {
         // 设置认证头
         args->extraHeaders.emplace("Authorization", "Bearer " + g_config->id_token);
