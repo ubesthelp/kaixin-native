@@ -114,6 +114,7 @@ static int sign_in_handler(const rapidjson::Value &data)
     get(g_config->email, doc, "email");
     get(g_config->agent_code, doc, "agent_code");
     get(g_config->secret, doc, "secret");
+    get(g_config->id_token_expires_at, doc, "exp");
 
     assert(g_profile == nullptr);
     g_profile = new kaixin_profile_t;
@@ -127,8 +128,8 @@ static int sign_in_handler(const rapidjson::Value &data)
     g_profile->secret = g_config->secret.c_str();
     g_profile->access_token_expires_at = g_config->access_token_expires_at;
     g_profile->refresh_token_expires_at = g_config->refresh_token_expires_at;
+    g_profile->id_token_expires_at = g_config->id_token_expires_at;
     get(g_profile->status, doc, "status");
-    get(g_profile->id_token_expires_at, doc, "exp");
 
     return 0;
 }

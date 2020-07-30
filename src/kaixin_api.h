@@ -39,6 +39,7 @@ struct Config
     std::string secret;                         ///< 本地对称加密密钥
     time_t access_token_expires_at = 0;         ///< 访问令牌过期时间
     time_t refresh_token_expires_at = 0;        ///< 更新令牌过期时间
+    time_t id_token_expires_at = 0;             ///< 身份令牌过期时间
 };
 
 

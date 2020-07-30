@@ -103,11 +103,21 @@ int send_request(const std::string &verb, const std::string &path, const string_
 {
     assert(!verb.empty() && !path.empty() && path.at(0) == '/' && !!handler);
 
-    // 设置公共参数：k、t、z，并签名
+    // 设置公共参数：k、t、z
     string_map params = queries;
     params.emplace("k", g_config->app_key);
     params.emplace("t", std::to_string(utils::timestamp()));
     params.emplace("z", utils::generate_random_hex_string(16));
+
+    // 如果有访问令牌，则设置 a 参数
+    auto now = time(nullptr);
+
+    if (!g_config->access_token.empty() && g_config->access_token_expires_at < now)
+    {
+        params.emplace("a", g_config->access_token);
+    }
+
+    // 签名
     params.emplace("s", sign(verb, path, params, form));
 
     // 构造 URL
@@ -116,10 +126,10 @@ int send_request(const std::string &verb, const std::string &path, const string_
     ix::HttpClient http;
     auto args = http.createRequest();
 
-    if (!g_config->id_token.empty())
+    if (!g_config->id_token.empty() && g_config->id_token_expires_at < now)
     {
         // 设置认证头
-        args->extraHeaders.insert(std::make_pair("Authorization", "Bearer " + g_config->id_token));
+        args->extraHeaders.emplace("Authorization", "Bearer " + g_config->id_token);
     }
 
     // 构造请求体，并发送请求
@@ -141,6 +151,7 @@ int send_request(const std::string &verb, const std::string &path, const string_
         return -1;
     }
 
+    // 服务端错误代码
     int code = get(doc, "code");
 
     if ((resp->statusCode / 100) != 2 || code != 0)
@@ -149,6 +160,7 @@ int send_request(const std::string &verb, const std::string &path, const string_
         return utils::make_int(resp->statusCode, get(doc, "code"));
     }
 
+    // 如果指定了响应处理函数，则调用；否则直接返回 0
     if (handler)
     {
         return handler(doc["data"]);
