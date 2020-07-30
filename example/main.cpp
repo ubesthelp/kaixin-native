@@ -16,6 +16,10 @@
 #include "appkey.h"         // For APP_KEY, APP_SECRET
 #include "kaixin.h"
 
+#ifdef KAIXIN_BUILD_INTERNAL_API
+#include "kaixin_internal.h"
+#endif
+
 
 int main()
 {
@@ -48,6 +52,23 @@ int main()
         }
 
         std::cout << "Signed in." << std::endl;
+
+#ifdef KAIXIN_BUILD_INTERNAL_API
+        std::cout << "Change password." << std::endl;
+        std::cout << "Input new password: ";
+        std::cin >> username;
+
+        if (!username.empty())
+        {
+            r = kaixin::itnl::change_password(password, username);
+
+            if (r != 0)
+            {
+                std::cerr << "Failed to change password:" << r << std::endl;
+                break;
+            }
+        }
+#endif
     } while (false);
 
     std::cout << "Uninitializing." << std::endl;
