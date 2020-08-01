@@ -54,17 +54,31 @@ int main()
         std::cout << "Signed in." << std::endl;
 
 #ifdef KAIXIN_BUILD_INTERNAL_API
-        std::cout << "Change password." << std::endl;
-        std::cout << "Input new password: ";
-        std::cin >> username;
+        //std::cout << "Change password." << std::endl;
+        //std::cout << "Input new password: ";
+        //std::cin >> username;
 
-        if (!username.empty())
+        //if (!username.empty())
+        //{
+        //    r = kaixin::itnl::change_password(password, username);
+
+        //    if (r != 0)
+        //    {
+        //        std::cerr << "Failed to change password: " << r << std::endl;
+        //        break;
+        //    }
+        //}
+
+        std::cout << "Set password: ";
+        std::cin >> password;
+
+        if (!password.empty())
         {
-            r = kaixin::itnl::change_password(password, username);
+            r = kaixin::itnl::set_password(password);
 
             if (r != 0)
             {
-                std::cerr << "Failed to change password: " << r << std::endl;
+                std::cerr << "Failed to set password: " << r << std::endl;
                 break;
             }
         }

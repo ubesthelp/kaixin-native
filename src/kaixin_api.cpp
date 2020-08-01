@@ -99,7 +99,8 @@ std::string make_url(const std::string &base_url, const std::string &path, const
 }
 
 
-int send_request(const std::string &verb, const std::string &path, const string_map &queries, const string_map &form, const response_data_handler &handler)
+int send_request(const std::string &verb, const std::string &path, const string_map &queries,
+                 const string_map &form, const response_data_handler &handler)
 {
     assert(!verb.empty() && !path.empty() && path.at(0) == '/');
 
