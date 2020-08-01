@@ -34,24 +34,26 @@ int main()
             break;
         }
 
-        std::cout << "Input username: ";
+
+        //std::cout << "Input username: ";
         std::string username;
-        std::cin >> username;
+        //std::cin >> username;
 
-        std::cout << "Input password: ";
+        //std::cout << "Input password: ";
         std::string password;
-        std::cin >> password;
+        //std::cin >> password;
 
-        std::cout << "Signing in." << std::endl;
-        r = kaixin_sign_in(username.c_str(), password.c_str());
+        //std::cout << "Signing in." << std::endl;
+        //r = kaixin_sign_in(username.c_str(), password.c_str());
 
-        if (r != 0)
-        {
-            std::cerr << "Failed to sign in: " << r << std::endl;
-            break;
-        }
+        //if (r != 0)
+        //{
+        //    std::cerr << "Failed to sign in: " << r << std::endl;
+        //    break;
+        //}
 
-        std::cout << "Signed in." << std::endl;
+        //std::cout << "Signed in." << std::endl;
+
 
 #ifdef KAIXIN_BUILD_INTERNAL_API
         //std::cout << "Change password." << std::endl;
@@ -69,16 +71,58 @@ int main()
         //    }
         //}
 
-        std::cout << "Set password: ";
-        std::cin >> password;
 
-        if (!password.empty())
+        //std::cout << "Set password: ";
+        //std::cin >> password;
+
+        //if (!password.empty())
+        //{
+        //    r = kaixin::itnl::set_password(password);
+
+        //    if (r != 0)
+        //    {
+        //        std::cerr << "Failed to set password: " << r << std::endl;
+        //        break;
+        //    }
+        //}
+
+
+        //std::cout << "Send verification email." << std::endl;
+        //std::cout << "To: ";
+        //std::cin >> username;
+        //std::cout << "Locale: ";
+        //std::cin >> password;
+
+        //if (!username.empty())
+        //{
+        //    r = kaixin::itnl::send_vcode_email(username, password);
+
+        //    if (r != 0)
+        //    {
+        //        std::cerr << "Failed to send verification email: " << r << std::endl;
+        //        break;
+        //    }
+        //}
+
+
+        std::cout << "Send reset password email." << std::endl;
+        std::string email, link;
+        std::cout << "To: ";
+        std::cin >> email;
+        std::cout << "Locale: ";
+        std::cin >> password;
+        std::cout << "Username: ";
+        std::cin >> username;
+        std::cout << "Link: ";
+        std::cin >> link;
+
+        if (!email.empty())
         {
-            r = kaixin::itnl::set_password(password);
+            r = kaixin::itnl::send_reset_password_email(email, { username, username }, { link, link }, password);
 
             if (r != 0)
             {
-                std::cerr << "Failed to set password: " << r << std::endl;
+                std::cerr << "Failed to send reset password email: " << r << std::endl;
                 break;
             }
         }
