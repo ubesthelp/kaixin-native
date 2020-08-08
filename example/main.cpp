@@ -10,6 +10,7 @@
  * \copyright   © 2020 开心网络。
  *
  **************************************************************************************************/
+#include <iomanip>
 #include <iostream>
 #include <string>
 
@@ -21,6 +22,19 @@
 #endif
 
 
+static inline bool has_error(int r, const char *action)
+{
+    if (r != 0)
+    {
+        std::cerr << "Failed to " << action << ": 0x" << std::setfill('0') << std::setw(8)
+            << std::right << std::hex << r << std::endl;
+        return true;
+    }
+
+    return false;
+}
+
+
 int main()
 {
     do
@@ -28,31 +42,29 @@ int main()
         std::cout << "Initializing." << std::endl;
         auto r = kaixin_initialize(APP_KEY, APP_SECRET, KAIXIN_BASE_URL_FOR_TESTING);
 
-        if (r != 0)
+        if (has_error(r, "initialize"))
         {
-            std::cerr << "Failed to initialize: " << r << std::endl;
             break;
         }
 
-
-        //std::cout << "Input username: ";
         std::string username;
-        //std::cin >> username;
-
-        //std::cout << "Input password: ";
         std::string password;
-        //std::cin >> password;
 
-        //std::cout << "Signing in." << std::endl;
-        //r = kaixin_sign_in(username.c_str(), password.c_str());
+        std::cout << "Input username: ";
+        std::cin >> username;
 
-        //if (r != 0)
-        //{
-        //    std::cerr << "Failed to sign in: " << r << std::endl;
-        //    break;
-        //}
+        std::cout << "Input password: ";
+        std::cin >> password;
 
-        //std::cout << "Signed in." << std::endl;
+        std::cout << "Signing in." << std::endl;
+        r = kaixin_sign_in(username.c_str(), password.c_str());
+
+        if (has_error(r, "sign in"))
+        {
+            break;
+        }
+
+        std::cout << "Signed in." << std::endl;
 
 
 #ifdef KAIXIN_BUILD_INTERNAL_API
@@ -105,26 +117,37 @@ int main()
         //}
 
 
-        std::cout << "Send reset password email." << std::endl;
-        std::string email, link;
-        std::cout << "To: ";
-        std::cin >> email;
-        std::cout << "Locale: ";
-        std::cin >> password;
-        std::cout << "Username: ";
+        //std::cout << "Send reset password email." << std::endl;
+        //std::string email, link;
+        //std::cout << "To: ";
+        //std::cin >> email;
+        //std::cout << "Locale: ";
+        //std::cin >> password;
+        //std::cout << "Username: ";
+        //std::cin >> username;
+        //std::cout << "Link: ";
+        //std::cin >> link;
+
+        //if (!email.empty())
+        //{
+        //    r = kaixin::itnl::send_reset_password_email(email, { username, username }, { link, link }, password);
+
+        //    if (r != 0)
+        //    {
+        //        std::cerr << "Failed to send reset password email: " << r << std::endl;
+        //        break;
+        //    }
+        //}
+
+
+        std::cout << "Activate." << std::endl;
+        std::cout << "SN: ";
         std::cin >> username;
-        std::cout << "Link: ";
-        std::cin >> link;
 
-        if (!email.empty())
+        if (!username.empty())
         {
-            r = kaixin::itnl::send_reset_password_email(email, { username, username }, { link, link }, password);
-
-            if (r != 0)
-            {
-                std::cerr << "Failed to send reset password email: " << r << std::endl;
-                break;
-            }
+            r = kaixin::itnl::activate({ username });
+            has_error(r, "activate");
         }
 #endif
     } while (false);
