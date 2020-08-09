@@ -19,7 +19,12 @@ add_library(${target} SHARED
     rapidjsonhelpers.h
     utils.h utils.cpp
     jwt.h jwt.cpp
+    fingerprint.h fingerprint.cpp
 )
+
+if(WIN32)
+    target_sources(${target} PRIVATE wmi_client.h wmi_client.cpp)
+endif()
 
 # 查找依赖库
 # RapidJSON
@@ -41,6 +46,7 @@ target_include_directories(${target} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
     PRIVATE ${RapidJSON_INCLUDE_DIRS} ${IXWEBSOCKET_INCLUDE_DIR}
 )
 target_precompile_headers(${target} PRIVATE
+    "<map>" "<string>" "<vector>"
     "<ixwebsocket/IXHttpClient.h>" "<ixwebsocket/IXWebSocket.h>"
     "<rapidjson/document.h>"
 )

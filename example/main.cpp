@@ -48,6 +48,9 @@ int main()
         }
 
         std::cout << "Signed in." << std::endl;
+
+        std::cout << "Getting device ID.";
+        std::cout << "Device ID: " << kaixin_get_device_id() << std::endl;
     } while (false);
 
     std::cout << "Uninitializing." << std::endl;

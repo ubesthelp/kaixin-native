@@ -99,6 +99,14 @@ KAIXIN_API int kaixin_sign_in(const char *username, const char *password);
 KAIXIN_API const kaixin_profile_t *kaixin_get_profile();
 
 
+/*!
+ * \brief       获取设备 ID。
+ *
+ * \return      如果成功，则返回设备 ID；否则返回 `NULL`。
+ */
+KAIXIN_API const char *kaixin_get_device_id();
+
+
 #ifdef __cplusplus
 }       // extern "C"
 #endif

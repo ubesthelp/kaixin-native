@@ -14,6 +14,7 @@
 
 #include <ixwebsocket/IXNetSystem.h>
 
+#include "fingerprint.h"
 #include "jwt.h"
 #include "kaixin_api.h"
 #include "rapidjsonhelpers.h"
@@ -149,4 +150,31 @@ int kaixin_sign_in(const char *username, const char *password)
 const kaixin_profile_t *kaixin_get_profile()
 {
     return g_profile;
+}
+
+
+// 获取设备 ID
+const char *kaixin_get_device_id()
+{
+    if (g_config == nullptr)
+    {
+        return nullptr;
+    }
+
+    if (!g_config->device_id.empty())
+    {
+        return g_config->device_id.c_str();
+    }
+
+    kaixin::string_map form{
+        { "fp", fp::generate_simple_fingerprint() },
+    };
+
+    kaixin::send_request(ix::HttpClient::kPost, "/device-id", form, [](const rapidjson::Value &data)
+    {
+        g_config->device_id = data.GetString();
+        return 0;
+    });
+
+    return g_config->device_id.c_str();
 }

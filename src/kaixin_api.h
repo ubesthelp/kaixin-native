@@ -37,6 +37,7 @@ struct Config
     std::string email;                          ///< Email
     std::string agent_code;                     ///< 上级代理编号
     std::string secret;                         ///< 本地对称加密密钥
+    std::string device_id;                      ///< 设备 ID
     time_t access_token_expires_at = 0;         ///< 访问令牌过期时间
     time_t refresh_token_expires_at = 0;        ///< 更新令牌过期时间
     time_t id_token_expires_at = 0;             ///< 身份令牌过期时间
