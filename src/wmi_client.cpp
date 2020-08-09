@@ -33,7 +33,7 @@ static inline std::string to_narrow(const std::wstring &wide)
     auto size = WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), -1, NULL, 0, NULL, NULL);
     std::string narrow(size, 0);
     WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), -1, narrow.data(), size, NULL, NULL);
-    narrow.resize(size - 1);
+    narrow.resize(narrow.size() - 1);
     return narrow;
 }
 
