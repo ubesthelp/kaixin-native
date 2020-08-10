@@ -140,15 +140,23 @@ int main()
         //}
 
 
-        std::cout << "Activate." << std::endl;
-        std::cout << "SN: ";
-        std::cin >> username;
+        //std::cout << "Activate." << std::endl;
+        //std::cout << "SN: ";
+        //std::cin >> username;
 
-        if (!username.empty())
-        {
-            r = kaixin::itnl::activate({ username });
-            has_error(r, "activate");
-        }
+        //if (!username.empty())
+        //{
+        //    r = kaixin::itnl::activate({ username });
+        //    has_error(r, "activate");
+        //}
+
+
+        std::cout << "Get payment URL." << std::endl;
+        std::cout << "Order number: ";
+        std::cin >> username;
+        std::cout << "Channel: ";
+        std::cin >> password;
+        std::cout << kaixin::itnl::get_payment_url(username, password) << std::endl;
 #endif
     } while (false);
 
