@@ -146,6 +146,12 @@ int kaixin_sign_in(const char *username, const char *password)
 }
 
 
+int kaixin_sign_out()
+{
+    return kaixin::send_request("DELETE", "/session");
+}
+
+
 // 获取用户配置
 const kaixin_profile_t *kaixin_get_profile()
 {

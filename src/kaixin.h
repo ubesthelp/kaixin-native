@@ -92,6 +92,14 @@ KAIXIN_API int kaixin_sign_in(const char *username, const char *password);
 
 
 /*!
+ * \brief       注销。
+ *
+ * \return      如果成功，则返回零；否则返回非零。
+ */
+KAIXIN_API int kaixin_sign_out();
+
+
+/*!
  * \brief       获取用户配置。
  *
  * \return      如果登录成功，则返回用户配置文件；否则返回 `NULL`。

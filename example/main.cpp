@@ -49,8 +49,17 @@ int main()
 
         std::cout << "Signed in." << std::endl;
 
-        std::cout << "Getting device ID.";
+        std::cout << "Getting device ID." << std::endl;
         std::cout << "Device ID: " << kaixin_get_device_id() << std::endl;
+
+
+        std::cout << "Signing out." << std::endl;
+        r = kaixin_sign_out();
+
+        if (r != 0)
+        {
+            std::cerr << "Failed to sign out:" << r << std::endl;
+        }
     } while (false);
 
     std::cout << "Uninitializing." << std::endl;
