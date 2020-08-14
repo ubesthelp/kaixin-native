@@ -1,1 +1,2 @@
 appkey.h filter=git-crypt diff=git-crypt merge=git-crypt
+kaixin_internal.* filter=git-crypt diff=git-crypt merge=git-crypt

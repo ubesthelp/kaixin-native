@@ -27,7 +27,7 @@
 #endif
 
 
-static kaixin_profile_t *g_profile = nullptr;
+kaixin_profile_t *g_profile = nullptr;
 
 
 // 初始化

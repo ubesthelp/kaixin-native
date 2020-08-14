@@ -55,4 +55,11 @@ target_link_libraries(${target} PRIVATE
     CPPCODEC
 )
 
+option(KAIXIN_BUILD_INTERNAL_API "Build the internal APIs." OFF)
+
+if(KAIXIN_BUILD_INTERNAL_API)
+    target_sources(${target} PRIVATE kaixin_internal.h kaixin_internal.cpp)
+    target_compile_definitions(${target} PUBLIC "KAIXIN_BUILD_INTERNAL_API")
+endif()
+
 common_config(${target})
