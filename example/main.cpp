@@ -47,11 +47,6 @@ int main()
             break;
         }
 
-        std::cout << "Getting lowest version." << std::endl;
-        kaixin_version_t lowest = kaixin_get_lowest_version();
-        std::cout << "Lowest version: " << lowest.major << "." << lowest.minor << "."
-            << lowest.patch << std::endl;
-
         std::string username;
         std::string password;
 
@@ -70,6 +65,13 @@ int main()
         }
 
         std::cout << "Signed in." << std::endl;
+
+
+        std::cout << "Getting lowest version." << std::endl;
+        kaixin_version_t lowest = kaixin_get_lowest_version();
+        std::cout << "Lowest version: " << lowest.major << "." << lowest.minor << "."
+            << lowest.patch << std::endl;
+
 
         std::cout << "Getting device ID." << std::endl;
         std::cout << "Device ID: " << kaixin_get_device_id() << std::endl;
@@ -159,12 +161,12 @@ int main()
         //}
 
 
-        std::cout << "Get payment URL." << std::endl;
-        std::cout << "Order number: ";
-        std::cin >> username;
-        std::cout << "Channel: ";
-        std::cin >> password;
-        std::cout << kaixin::itnl::get_payment_url(username, password) << std::endl;
+        //std::cout << "Get payment URL." << std::endl;
+        //std::cout << "Order number: ";
+        //std::cin >> username;
+        //std::cout << "Channel: ";
+        //std::cin >> password;
+        //std::cout << kaixin::itnl::get_payment_url(username, password) << std::endl;
 #endif
 
 

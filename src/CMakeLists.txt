@@ -20,6 +20,7 @@ add_library(${target} SHARED
     utils.h utils.cpp
     jwt.h jwt.cpp
     fingerprint.h fingerprint.cpp
+    authorization_disabler.h
 )
 
 if(WIN32)

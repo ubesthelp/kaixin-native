@@ -14,6 +14,7 @@
 
 #include <ixwebsocket/IXNetSystem.h>
 
+#include "authorization_disabler.h"
 #include "fingerprint.h"
 #include "jwt.h"
 #include "kaixin_api.h"
@@ -191,6 +192,7 @@ kaixin_version_t kaixin_get_lowest_version()
 {
     kaixin_version_t lowest = { 0, 0, 0 };
 
+    kaixin::AuthorizationDisabler atd;
     kaixin::send_request(ix::HttpClient::kGet, "/lowest-version", [&lowest](const rapidjson::Value &data)
     {
         get(lowest.major, data, "major");
