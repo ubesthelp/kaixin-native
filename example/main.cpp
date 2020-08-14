@@ -30,6 +30,11 @@ int main()
             break;
         }
 
+        std::cout << "Getting lowest version." << std::endl;
+        kaixin_version_t lowest = kaixin_get_lowest_version();
+        std::cout << "Lowest version: " << lowest.major << "." << lowest.minor << "."
+            << lowest.patch << std::endl;
+
         std::cout << "Input username: ";
         std::string username;
         std::cin >> username;

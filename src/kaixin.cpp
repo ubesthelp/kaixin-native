@@ -184,3 +184,20 @@ const char *kaixin_get_device_id()
 
     return g_config->device_id.c_str();
 }
+
+
+// 获取应用最低版本号
+kaixin_version_t kaixin_get_lowest_version()
+{
+    kaixin_version_t lowest = { 0, 0, 0 };
+
+    kaixin::send_request(ix::HttpClient::kGet, "/lowest-version", [&lowest](const rapidjson::Value &data)
+    {
+        get(lowest.major, data, "major");
+        get(lowest.minor, data, "minor");
+        get(lowest.patch, data, "patch");
+        return 0;
+    });
+
+    return lowest;
+}
