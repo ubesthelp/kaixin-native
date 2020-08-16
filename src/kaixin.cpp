@@ -32,7 +32,8 @@ kaixin_profile_t *g_profile = nullptr;
 
 
 // 初始化
-int kaixin_initialize(const char *app_key, const char *app_secret, const char *base_url)
+int kaixin_initialize(const char *organization, const char *application, const char *app_key,
+                      const char *app_secret, const char *base_url)
 {
     if (g_config != nullptr)
     {
@@ -40,9 +41,10 @@ int kaixin_initialize(const char *app_key, const char *app_secret, const char *b
         return EPERM;
     }
 
-    if (utils::is_empty(app_key) || utils::is_empty(app_secret))
+    if (utils::is_empty(organization) || utils::is_empty(application)
+        || utils::is_empty(app_key) || utils::is_empty(app_secret))
     {
-        // APP KEY 或 SECRET 为空
+        // 组织名、应用名、APP KEY 或 SECRET 为空
         return EINVAL;
     }
 
@@ -54,6 +56,8 @@ int kaixin_initialize(const char *app_key, const char *app_secret, const char *b
 
     g_config = new kaixin::Config;
     _ASSERT(g_config != nullptr);
+    g_config->organization = organization;
+    g_config->application = application;
     g_config->app_key = app_key;
     g_config->app_secret = app_secret;
 
@@ -117,6 +121,11 @@ static int sign_in_handler(const rapidjson::Value &data)
     get(g_config->agent_code, doc, "agent_code");
     get(g_config->secret, doc, "secret");
     get(g_config->id_token_expires_at, doc, "exp");
+
+    if (g_config->agent_code.empty())
+    {
+        g_config->agent_code = utils::get_local_agent_code();
+    }
 
     assert(g_profile == nullptr);
     g_profile = new kaixin_profile_t;
@@ -202,4 +211,33 @@ kaixin_version_t kaixin_get_lowest_version()
     });
 
     return lowest;
+}
+
+
+// 获取素材
+const char *kaixin_get_material(const char *type)
+{
+    if (g_config == nullptr)
+    {
+        return nullptr;
+    }
+
+    if (!g_config->materials.empty())
+    {
+        // 素材已经获取过了，直接查找返回
+        auto iter = g_config->materials.find(type);
+
+        if (iter == g_config->materials.end())
+        {
+            return nullptr;
+        }
+
+        return iter->second.c_str();
+    }
+
+    // 获取素材
+    kaixin::string_map form{
+
+    };
+    return nullptr;
 }

@@ -15,6 +15,15 @@
 #include <sstream>
 #include <string>
 
+#if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WIN__) || defined(__WINDOWS__)
+// Windows 平台
+#define KAIXIN_OS_WINDOWS
+#include <variant>
+#else
+// 其它平台没测试过，暂不支持。
+#error "Unsupported platform."
+#endif
+
 
 namespace utils {
 
@@ -109,6 +118,91 @@ std::string join(Range const &elements, const char *const delimiter)
 
     return os.str();
 }
+
+
+/*!
+ * \brief       获取当前区域语言。
+ *
+ * \return      BCP 47 格式区域语言，以半角下划线“_”分隔。
+ */
+const std::string &get_current_locale();
+
+
+/*!
+ * \brief       获取本地代理编号。
+ *
+ * \return      本地代理编号。
+ */
+std::string get_local_agent_code();
+
+
+#ifdef KAIXIN_OS_WINDOWS
+/*!
+ * \brief       将宽字符串转换为 UTF-8 编码窄字符串。
+ *
+ * \param[in]   wide        要转换的宽字符串
+ *
+ * \return      转换后的 UTF-8 窄字符串。
+ */
+std::string to_narrow(const std::wstring &wide);
+
+
+/*!
+ * \brief       将 UTF-8 编码窄字符串转换为宽字符串。
+ *
+ * \param[in]   wide        要转换的 UTF-8 编码窄字符串
+ *
+ * \return      转换后宽字符串。
+ */
+std::wstring to_wide(const std::string &narrow);
+
+
+// 注册表值
+using reg_value = std::variant<std::string, std::vector<uint8_t>, uint64_t>;
+
+
+/*!
+ * \brief       获取注册表值。
+ *
+ * \param[in]   value_name      值名称
+ * \param[in]   default_value   当值不存在时要返回的默认值
+ *
+ * \return      值或默认值。
+ */
+reg_value get_reg_value(const std::string &value_name, const reg_value &default_value = {});
+
+
+/*!
+ * \brief       获取注册表字符串值。
+ *
+ * \param[in]   value_name      字符串值名称
+ * \param[in]   default_value   当值不存在时要返回的默认值
+ *
+ * \return      字符串值或默认值。
+ */
+inline std::string get_reg_string_value(const std::string &value_name,
+                                        const std::string &default_value = {})
+{
+    auto value = get_reg_value(value_name, default_value);
+    return std::get<std::string>(value);
+}
+
+
+/*!
+ * \brief       获取注册表二进制值。
+ *
+ * \param[in]   value_name      二进制值名称
+ * \param[in]   default_value   当值不存在时要返回的默认值
+ *
+ * \return      二进制值或默认值。
+ */
+inline std::vector<uint8_t> get_reg_binary_value(const std::string &value_name,
+                                                 const std::vector<uint8_t> &default_value = {})
+{
+    auto value = get_reg_value(value_name, default_value);
+    return std::get<std::vector<uint8_t>>(value);
+}
+#endif
 
 
 }       // namespace utils

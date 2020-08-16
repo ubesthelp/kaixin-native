@@ -27,8 +27,30 @@
 #endif
 #endif
 
-/// 用于测试的基础 URL。
+// 用于测试的基础 URL。
 #define KAIXIN_BASE_URL_FOR_TESTING     "https://api-v3-test.hlwcr.cn"
+
+// 素材类型 - 左下角广告大图片 200x300
+#define KAIXIN_MATERIAL_AD_BOTTOMLEFT_IMAGE_LARGE   "ad-bottomleft-img-l"
+// 素材类型 - 左下角广告小图片 140x100
+#define KAIXIN_MATERIAL_AD_BOTTOMLEFT_IMAGE_SMALL   "ad-bottomleft-img-s"
+// 素材类型 - 左下角广告链接
+#define KAIXIN_MATERIAL_AD_BOTTOMLEFT_TARGET        "ad-bottomleft-target"
+// 素材类型 - 登录对话框头图
+#define KAIXIN_MATERIAL_SIGN_HEADER_IMAGE           "sign-header-img"
+// 素材类型 - 登录对话框头图链接
+#define KAIXIN_MATERIAL_SIGN_HEADER_TARGET          "sign-header-target"
+// 素材类型 - 常见问题链接
+#define KAIXIN_MATERIAL_FAQ                         "faq"
+// 素材类型 - 提交工单链接
+#define KAIXIN_MATERIAL_WORKORDER                   "workorder"
+// 素材类型 - 联系我们链接
+#define KAIXIN_MATERIAL_CONTACTUS                   "contactus"
+// 素材类型 - 下载最新版本链接
+#define KAIXIN_MATERIAL_DOWNLOAD                    "download"
+// 素材类型 - 导入模板链接
+#define KAIXIN_MATERIAL_IMPORT_TEMPLATES            "import-templates"
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -72,6 +94,8 @@ typedef struct kaixin_version_s
 /*!
  * \brief       初始化开心 SDK。在调用其它 API 前必须调用此函数。
  *
+ * \param[in]   organization    组织名，用于读写配置文件
+ * \param[in]   application     应用名，用于读写配置文件
  * \param[in]   app_key         APP KEY
  * \param[in]   app_secret      APP SECRET
  * \param[in]   base_url        基础 URL。如果设置为 NULL，则使用默认设置（生产环境）；开发及测试时请设置
@@ -79,7 +103,8 @@ typedef struct kaixin_version_s
  *
  * \return      如果成功，则返回零；否则返回非零。
  */
-KAIXIN_API int kaixin_initialize(const char *app_key, const char *app_secret, const char *base_url);
+KAIXIN_API int kaixin_initialize(const char *organization, const char *application,
+                                 const char *app_key, const char *app_secret, const char *base_url);
 
 
 
@@ -133,6 +158,27 @@ KAIXIN_API const char *kaixin_get_device_id();
  * \return      应用最低版本号。
  */
 KAIXIN_API kaixin_version_t kaixin_get_lowest_version();
+
+
+/*!
+ * \brief       获取素材。
+ *
+ * \param[in]   type            素材类型
+ *
+ * \return      素材内容，或 `NULL`。
+ *
+ * \sa          `KAIXIN_MATERIAL_AD_BOTTOMLEFT_IMAGE_LARGE`
+ * \sa          `KAIXIN_MATERIAL_AD_BOTTOMLEFT_IMAGE_SMALL`
+ * \sa          `KAIXIN_MATERIAL_AD_BOTTOMLEFT_TARGET`
+ * \sa          `KAIXIN_MATERIAL_SIGN_HEADER_IMAGE`
+ * \sa          `KAIXIN_MATERIAL_SIGN_HEADER_TARGET`
+ * \sa          `KAIXIN_MATERIAL_FAQ`
+ * \sa          `KAIXIN_MATERIAL_WORKORDER`
+ * \sa          `KAIXIN_MATERIAL_CONTACTUS`
+ * \sa          `KAIXIN_MATERIAL_DOWNLOAD`
+ * \sa          `KAIXIN_MATERIAL_IMPORT_TEMPLATES`
+ */
+KAIXIN_API const char *kaixin_get_material(const char *type);
 
 
 #ifdef __cplusplus

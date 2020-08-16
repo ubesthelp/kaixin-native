@@ -20,22 +20,15 @@
 #include <codecvt>
 #include <locale>
 
+ // vaCI:skip+*:nullptr
+#include "utils.h"
+
 #define BREAK_ON_FAILURE(hr)    if (FAILED(hr)) break
 
 _COM_SMARTPTR_TYPEDEF(IWbemLocator, __uuidof(IWbemLocator));
 _COM_SMARTPTR_TYPEDEF(IWbemServices, __uuidof(IWbemServices));
 _COM_SMARTPTR_TYPEDEF(IWbemClassObject, __uuidof(IWbemClassObject));
 _COM_SMARTPTR_TYPEDEF(IEnumWbemClassObject, __uuidof(IEnumWbemClassObject));
-
-
-static inline std::string to_narrow(const std::wstring &wide)
-{
-    auto size = WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), -1, NULL, 0, NULL, NULL);
-    std::string narrow(size, 0);
-    WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), -1, narrow.data(), size, NULL, NULL);
-    narrow.resize(narrow.size() - 1);
-    return narrow;
-}
 
 
 class wmi_client_private
@@ -126,7 +119,7 @@ std::vector<std::string> wmi_client::query(const wchar_t *cls, const wchar_t *fi
             switch (value.vt)
             {
             case VT_BSTR:
-                result.push_back(to_narrow(value.bstrVal));
+                result.push_back(utils::to_narrow(value.bstrVal));
                 break;
             case VT_I4:
                 result.push_back(std::to_string(value.lVal));

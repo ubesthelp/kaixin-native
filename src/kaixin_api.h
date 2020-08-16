@@ -15,6 +15,7 @@
 
 #include <ctime>
 #include <functional>
+#include <map>
 #include <string>
 
 #include <ixwebsocket/IXWebSocketHttpHeaders.h>
@@ -27,6 +28,8 @@ namespace kaixin {
 /// 全局配置参数。
 struct Config
 {
+    std::string organization;                   ///< 组织名
+    std::string application;                    ///< 应用名
     std::string app_key;                        ///< APP KEY
     std::string app_secret;                     ///< APP SECRET
     std::string base_url;                       ///< 基础 URL
@@ -38,6 +41,7 @@ struct Config
     std::string agent_code;                     ///< 上级代理编号
     std::string secret;                         ///< 本地对称加密密钥
     std::string device_id;                      ///< 设备 ID
+    std::map<std::string, std::string> materials;       ///< 素材
     time_t access_token_expires_at = 0;         ///< 访问令牌过期时间
     time_t refresh_token_expires_at = 0;        ///< 更新令牌过期时间
     time_t id_token_expires_at = 0;             ///< 身份令牌过期时间

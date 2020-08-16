@@ -40,7 +40,8 @@ int main()
     do
     {
         std::cout << "Initializing." << std::endl;
-        auto r = kaixin_initialize(APP_KEY, APP_SECRET, KAIXIN_BASE_URL_FOR_TESTING);
+        auto r = kaixin_initialize(APP_ORG, APP_NAME, APP_KEY, APP_SECRET,
+                                   KAIXIN_BASE_URL_FOR_TESTING);
 
         if (has_error(r, "initialize"))
         {
