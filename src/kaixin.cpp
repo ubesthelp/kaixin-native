@@ -236,8 +236,31 @@ const char *kaixin_get_material(const char *type)
     }
 
     // 获取素材
-    kaixin::string_map form{
-
+    kaixin::string_map queries{
+        { "locale", utils::get_current_locale() },
+        { "agent_code", g_config->agent_code.empty() ? utils::get_local_agent_code() : g_config->agent_code },
     };
-    return nullptr;
+
+    kaixin::send_request(ix::HttpClient::kGet, "/materials", queries, {}, [](const rapidjson::Value &data)
+    {
+        using rapidjson::get;
+
+        for (const auto &e : data.GetArray())
+        {
+            auto name = get<std::string>(e, "name");
+            auto text = get<std::string>(e, "text");
+            g_config->materials.emplace(name, text);
+        }
+
+        return 0;
+    });
+
+    auto iter = g_config->materials.find(type);
+
+    if (iter == g_config->materials.end())
+    {
+        return nullptr;
+    }
+
+    return iter->second.c_str();
 }
