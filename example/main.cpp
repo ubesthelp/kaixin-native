@@ -83,6 +83,30 @@ int main()
         std::cout << "Device ID: " << kaixin_get_device_id() << std::endl;
 
 
+        std::cout << "Getting auth." << std::endl;
+        auto *auth = kaixin_get_auth();
+
+        if (auth == nullptr)
+        {
+            std::cout << "No auth." << std::endl;
+        }
+        else
+        {
+            auto *p = auth;
+
+            while (p != nullptr)
+            {
+                std::cout << p->module_name << ":" << std::endl;
+                std::cout << "  edition: " << p->edition << std::endl;
+                std::cout << "  count  : " << p->count << std::endl;
+                std::cout << "  time   : " << p->time << std::endl;
+                p = p->next;
+            }
+
+            kaixin_free_auth(auth);
+        }
+
+
 #ifdef KAIXIN_BUILD_INTERNAL_API
         //std::cout << "Change password." << std::endl;
         //std::cout << "Input new password: ";

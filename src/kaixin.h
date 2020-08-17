@@ -11,6 +11,7 @@
  *
  **************************************************************************************************/
 #pragma once
+#include <stdint.h>
 #include <time.h>
 
 #ifdef KAIXIN_EXPORTS
@@ -91,6 +92,17 @@ typedef struct kaixin_version_s
 } kaixin_version_t;
 
 
+/// \brief      应用授权。
+typedef struct kaixin_auth_s
+{
+    struct kaixin_auth_s *next;                 ///< 下一个授权；如果没有下个授权，则为 `NULL`
+    const char *module_name;                    ///< 模块名称
+    uint32_t edition;                           ///< 版本
+    uint32_t count;                             ///< 数量
+    time_t time;                                ///< 过期时间
+} kaixin_auth_t;
+
+
 /*!
  * \brief       初始化开心 SDK。在调用其它 API 前必须调用此函数。
  *
@@ -147,6 +159,22 @@ KAIXIN_API const kaixin_profile_t *kaixin_get_profile();
  * \return      如果成功，则返回设备 ID；否则返回 `NULL`。
  */
 KAIXIN_API const char *kaixin_get_device_id();
+
+
+/*!
+ * \brief       获取应用授权。
+ *
+ * \return      应用授权；如果没有授权，则返回 `NULL`。返回的指针需要调用 `kaixin_free_auth` 函数释放。
+ */
+KAIXIN_API kaixin_auth_t *kaixin_get_auth();
+
+
+/*!
+ * \brief       释放授权链表。
+ *
+ * \param[in]   auth        要释放的链表。
+ */
+KAIXIN_API void kaixin_free_auth(kaixin_auth_t *auth);
 
 
 /*!

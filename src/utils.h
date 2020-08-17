@@ -24,6 +24,14 @@
 #error "Unsupported platform."
 #endif
 
+#if defined(_MSC_VER)
+#define KAIXIN_COMP_MSVC
+#elif defined(__clang__)
+#define KAIXIN_COMP_CLANG
+#elif defined(__GNUC__)
+#define KAIXIN_COMP_GNUC
+#endif
+
 
 namespace utils {
 

@@ -22,7 +22,7 @@
 #include "utils.h"
 
  // 纠正 EINVAL 被重定义为 WSAEINVAL 的问题。
-#ifdef WIN32
+#ifdef KAIXIN_OS_WINDOWS
 #undef EINVAL
 #define EINVAL 22
 #endif
@@ -193,6 +193,63 @@ const char *kaixin_get_device_id()
     });
 
     return g_config->device_id.c_str();
+}
+
+
+// 获取授权
+kaixin_auth_t * kaixin_get_auth()
+{
+    kaixin_auth_t *auth = nullptr;
+
+    kaixin::send_request(ix::HttpClient::kGet, "/auth", [&auth](const rapidjson::Value &data)
+    {
+        using rapidjson::get;
+        auto *prev = auth;
+
+        for (const auto &a : data.GetArray())
+        {
+            auto *p = new kaixin_auth_t;
+            p->next = nullptr;
+#ifdef KAIXIN_COMP_MSVC
+            p->module_name = _strdup(get<const char *>(a, "module"));
+#else
+            p->module_name = strdup(get<const char *>(a, "module"));
+#endif
+            get(p->edition, a, "edition");
+            get(p->count, a, "count");
+            get(p->time, a, "time");
+
+            if (auth == nullptr)
+            {
+                auth = p;
+            }
+            else
+            {
+                prev->next = p;
+            }
+
+            prev = p;
+        }
+
+        return 0;
+    });
+
+    return auth;
+}
+
+
+// 释放授权链表
+void kaixin_free_auth(kaixin_auth_t *auth)
+{
+    auto *p = auth;
+
+    while (p != nullptr)
+    {
+        auth = p->next;
+        free(const_cast<char *>(p->module_name));
+        delete p;
+        p = auth;
+    }
 }
 
 
