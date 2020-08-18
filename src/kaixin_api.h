@@ -41,7 +41,8 @@ struct Config
     std::string agent_code;                     ///< 上级代理编号
     std::string secret;                         ///< 本地对称加密密钥
     std::string device_id;                      ///< 设备 ID
-    std::map<std::string, std::string> materials;       ///< 素材
+    std::map<std::string, std::string> materials;           ///< 素材
+    kaixin_notification_callback_t *notify = nullptr;       ///< 下行通知回调函数
     time_t access_token_expires_at = 0;         ///< 访问令牌过期时间
     time_t refresh_token_expires_at = 0;        ///< 更新令牌过期时间
     time_t id_token_expires_at = 0;             ///< 身份令牌过期时间

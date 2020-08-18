@@ -52,6 +52,11 @@
 // 素材类型 - 导入模板链接
 #define KAIXIN_MATERIAL_IMPORT_TEMPLATES            "import-templates"
 
+// 下行通知动作 - 更新授权
+#define KAIXIN_ACTION_REFRESH_AUTH                  "refresh-auth"
+// 下行通知动作 - 注销
+#define KAIXIN_ACTION_SIGN_OUT                      "sign-out"
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -101,6 +106,22 @@ typedef struct kaixin_auth_s
     uint32_t count;                             ///< 数量
     time_t time;                                ///< 过期时间
 } kaixin_auth_t;
+
+
+/// \brief      下行通知参数。
+typedef struct kaixin_notification_arguments_s
+{
+    /*!
+     * \brief   客户端需要采取的动作
+     * \sa      `KAIXIN_ACTION_REFRESH_AUTH`
+     * \sa      `KAIXIN_ACTION_SIGN_OUT`
+     */
+    const char *action;                         
+} kaixin_notification_arguments_t;
+
+
+/// 下行通知回调函数
+typedef void(*kaixin_notification_callback_t)(const kaixin_notification_arguments_t *args);
 
 
 /*!
@@ -207,6 +228,16 @@ KAIXIN_API kaixin_version_t kaixin_get_lowest_version();
  * \sa          `KAIXIN_MATERIAL_IMPORT_TEMPLATES`
  */
 KAIXIN_API const char *kaixin_get_material(const char *type);
+
+
+/*!
+ * \brief       设置下行通知回调函数。
+ *
+ * \param[in]   func        下行通知到达时要调用的函数
+ *
+ * \return      如果成功，则返回零；否则返回非零。
+ */
+KAIXIN_API int kaixin_set_notification_callback(kaixin_notification_callback_t *func);
 
 
 #ifdef __cplusplus

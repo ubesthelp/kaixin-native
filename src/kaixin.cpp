@@ -321,3 +321,12 @@ const char *kaixin_get_material(const char *type)
 
     return iter->second.c_str();
 }
+
+
+int kaixin_set_notification_callback(kaixin_notification_callback_t *func)
+{
+    if (g_config == nullptr)
+    {
+        return EINVAL;
+    }
+}

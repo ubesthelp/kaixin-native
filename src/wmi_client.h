@@ -11,6 +11,8 @@
  *
  **************************************************************************************************/
 #pragma once
+#include "noncopyable.h"
+
 #include <string>
 #include <vector>
 
@@ -22,7 +24,7 @@ class wmi_client_private;
 
 
 /// WMI 客户端类。
-class wmi_client
+class wmi_client : private noncopyable
 {
 public:
     wmi_client();

@@ -14,13 +14,16 @@
 # 添加项目
 set(target kaixin)
 add_library(${target} SHARED
+    authorization_disabler.h
+    fingerprint.h fingerprint.cpp
+    jwt.h jwt.cpp
     kaixin.h kaixin.cpp
     kaixin_api.h kaixin_api.cpp
+    noncopyable.h
     rapidjsonhelpers.h
+    simple_timer.h simple_timer.cpp
     utils.h utils.cpp
-    jwt.h jwt.cpp
-    fingerprint.h fingerprint.cpp
-    authorization_disabler.h
+    websocket_client.h websocket_client.cpp
 )
 
 if(WIN32)
