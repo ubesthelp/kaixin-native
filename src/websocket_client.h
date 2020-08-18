@@ -16,6 +16,7 @@
 #include <functional>
 #include <map>
 #include <thread>
+#include <ixwebsocket/IXHttp.h>
 #include <ixwebsocket/IXWebSocketMessage.h>
 
 #include "kaixin.h"
@@ -49,6 +50,15 @@ private:
 
     void heartbeat();
 
+    std::string make_request(const std::string &verb, const std::string &path,
+                             const ix::WebSocketHttpHeaders &queries,
+                             const ix::WebSocketHttpHeaders &body,
+                             const ix::WebSocketHttpHeaders &headers);
+    int post(const std::string &path, const ix::WebSocketHttpHeaders &queries,
+             const ix::WebSocketHttpHeaders &body, const ix::WebSocketHttpHeaders &headers);
+
+    void handle_response(const std::string &json);
+
 private:
     using command_handler = std::function<void(const std::string_view &)>;
     std::map<std::string, command_handler> handlers_;
@@ -56,4 +66,6 @@ private:
     ix::WebSocket *ws_;
     simple_timer *heartbeat_timer_;
     kaixin_notification_callback_t callback_;
+    int seq_;
+    int reg_seq_;
 };

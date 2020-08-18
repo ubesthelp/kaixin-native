@@ -26,8 +26,8 @@ namespace kaixin {
 
 
 // 计算签名
-static std::string sign(const std::string &verb, const std::string &path, const string_map &queries,
-                        const string_map &form)
+std::string sign(const std::string &verb, const std::string &path, const string_map &queries,
+                 const string_map &form)
 {
     // 签名字符串：请求方法 + 路径
     std::string sts = verb + path;

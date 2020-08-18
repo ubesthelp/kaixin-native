@@ -89,6 +89,20 @@ std::string make_url(const std::string &base_url, const std::string &path, const
 
 
 /*!
+ * \brief       计算签名。
+ *
+ * \param[in]   verb            请求方法
+ * \param[in]   path            路径
+ * \param[in]   queries         查询
+ * \param[in]   form            请求体/表单
+ *
+ * \return      签名字符串。
+ */
+std::string sign(const std::string &verb, const std::string &path, const string_map &queries,
+                 const string_map &form);
+
+
+/*!
  * \brief       同步发送请求并返回结果。
  *
  * \param[in]   verb            请求方法，全大写
