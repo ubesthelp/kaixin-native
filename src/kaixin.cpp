@@ -85,13 +85,13 @@ int kaixin_initialize(const char *organization, const char *application, const c
 // 反初始化
 void kaixin_uninitialize()
 {
-    ix::uninitNetSystem();
-
     delete g_profile;
     g_profile = nullptr;
 
     delete g_config;
     g_config = nullptr;
+
+    ix::uninitNetSystem();
 }
 
 
@@ -159,6 +159,13 @@ int kaixin_sign_in(const char *username, const char *password)
 
 int kaixin_sign_out()
 {
+    if (g_config == nullptr)
+    {
+        return EINVAL;
+    }
+
+    g_config->notify.reset();
+
     return kaixin::send_request("DELETE", "/session");
 }
 

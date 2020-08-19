@@ -90,6 +90,7 @@ websocket_client::~websocket_client()
         cond_.wait_for(lock, 5s);
     }
 
+    ws_->stop();
     delete ws_;
 }
 
@@ -164,7 +165,7 @@ void websocket_client::on_register_device_succeeded(const std::string_view &arg)
     assert(heartbeat_timer_ == nullptr);
     heartbeat_timer_ = new simple_timer;
     heartbeat_timer_->set_timeout_callback(std::bind(&websocket_client::heartbeat, this));
-    heartbeat_timer_->start(interval * 1000);
+    heartbeat_timer_->start(interval);
 
     // 注册下行通知
     reg_seq_ = post("/notification", {}, {}, { { "x-ca-websocket_api_type", "REGISTER" } });
@@ -270,22 +271,15 @@ std::string websocket_client::make_request(const std::string &verb, const std::s
         write(w, "method", verb);
         write(w, "host", get_host(g_config->base_url));
         write(w, "path", path);
-        w.Key("queries");
+        w.Key("querys");
         w.StartObject();
         {
-            // 设置公共参数：k、t、z
+            // 设置公共参数：a、k、t、z
             auto params = queries;
+            params.emplace("a", g_config->access_token);
             params.emplace("k", g_config->app_key);
             params.emplace("t", std::to_string(now));
             params.emplace("z", utils::generate_random_hex_string(16));
-
-            // 如果有访问令牌，则设置 a 参数
-            now /= 1000;
-
-            if (!g_config->access_token.empty() && g_config->access_token_expires_at >= now)
-            {
-                params.emplace("a", g_config->access_token);
-            }
 
             // 签名
             params.emplace("s", kaixin::sign(verb, path, params, body));
@@ -309,11 +303,8 @@ std::string websocket_client::make_request(const std::string &verb, const std::s
 #endif
             write_array(w, "x-ca-seq", std::to_string(seq_++));
 
-            if (!g_config->id_token.empty() && g_config->id_token_expires_at >= now)
-            {
-                // 设置认证头
-                write(w, "authorization", "Bearer " + g_config->id_token);
-            }
+            // 设置认证头
+            write(w, "authorization", "Bearer " + g_config->id_token);
         }
         w.Key("isBase64");
         w.Int(0);
@@ -359,7 +350,7 @@ void websocket_client::handle_response(const std::string &json)
 
     auto status = get<int>(doc, "status");
     const auto &headers = doc["header"];
-    auto seq = get<int>(headers, "x-ca-seq");
+    auto seq = std::strtol(get<const char *>(headers, "x-ca-seq"), nullptr, 0);
 
     if (seq == reg_seq_)
     {

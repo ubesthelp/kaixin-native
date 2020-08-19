@@ -10,9 +10,11 @@
  * \copyright   © 2020 开心网络。
  *
  **************************************************************************************************/
+#include <chrono>
 #include <iomanip>
 #include <iostream>
 #include <string>
+#include <thread>
 
 #include "appkey.h"         // For APP_KEY, APP_SECRET
 #include "kaixin.h"
@@ -20,6 +22,8 @@
 #ifdef KAIXIN_BUILD_INTERNAL_API
 #include "kaixin_internal.h"
 #endif
+
+using namespace std::chrono_literals;
 
 
 static void kaixin_notification_callback(const kaixin_notification_arguments_t *args)
@@ -79,9 +83,6 @@ int main()
         std::cout << "Signed in." << std::endl;
 
 
-        kaixin_set_notification_callback(kaixin_notification_callback);
-
-
         std::cout << "Getting lowest version." << std::endl;
         kaixin_version_t lowest = kaixin_get_lowest_version();
         std::cout << "Lowest version: " << lowest.major << "." << lowest.minor << "."
@@ -90,6 +91,11 @@ int main()
 
         std::cout << "Getting device ID." << std::endl;
         std::cout << "Device ID: " << kaixin_get_device_id() << std::endl;
+
+
+        // 设备授权应用在获取应用 ID 后设置通知回调
+        kaixin_set_notification_callback(kaixin_notification_callback);
+        std::this_thread::sleep_for(5s);
 
 
         std::cout << "Getting auth." << std::endl;
