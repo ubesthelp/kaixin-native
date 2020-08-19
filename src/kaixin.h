@@ -237,7 +237,7 @@ KAIXIN_API const char *kaixin_get_material(const char *type);
  *
  * \return      如果成功，则返回零；否则返回非零。
  */
-KAIXIN_API int kaixin_set_notification_callback(kaixin_notification_callback_t *func);
+KAIXIN_API int kaixin_set_notification_callback(kaixin_notification_callback_t func);
 
 
 #ifdef __cplusplus

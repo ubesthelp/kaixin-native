@@ -20,6 +20,7 @@
 #include "kaixin_api.h"
 #include "rapidjsonhelpers.h"
 #include "utils.h"
+#include "websocket_client.h"
 
  // 纠正 EINVAL 被重定义为 WSAEINVAL 的问题。
 #ifdef KAIXIN_OS_WINDOWS
@@ -323,10 +324,13 @@ const char *kaixin_get_material(const char *type)
 }
 
 
-int kaixin_set_notification_callback(kaixin_notification_callback_t *func)
+int kaixin_set_notification_callback(kaixin_notification_callback_t func)
 {
-    if (g_config == nullptr)
+    if (g_config == nullptr || g_config->notify)
     {
         return EINVAL;
     }
+
+    g_config->notify = std::make_unique<websocket_client>(func);
+    return 0;
 }

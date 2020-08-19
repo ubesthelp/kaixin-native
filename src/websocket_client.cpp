@@ -12,6 +12,7 @@
  **************************************************************************************************/
 #include "websocket_client.h"
 
+#include <chrono>
 #include <ixwebsocket/IXWebSocket.h>
 #include <ixwebsocket/IXUrlParser.h>
 #include <rapidjson/ostreamwrapper.h>
@@ -59,6 +60,8 @@ websocket_client::websocket_client(kaixin_notification_callback_t callback)
     , callback_(callback)
     , seq_(0)
     , reg_seq_(-1)
+    , dereg_seq_(-1)
+    , registered_(false)
 {
     assert(callback != nullptr);
 
@@ -68,12 +71,25 @@ websocket_client::websocket_client(kaixin_notification_callback_t callback)
     handlers_.emplace("NF", std::bind(&websocket_client::on_notify, this, _1));
     handlers_.emplace("OS", std::bind(&websocket_client::on_flow_control, this, _1));
     handlers_.emplace("CR", std::bind(&websocket_client::on_life_cycle, this, _1));
+
+    create_socket();
 }
 
 
 websocket_client::~websocket_client()
 {
     delete heartbeat_timer_;
+
+    if (registered_)
+    {
+        // 注销下行通知
+        dereg_seq_ = del("/notification", {}, {}, { {"x-ca-websocket_api_type", "UNREGISTER"} });
+
+        using namespace std::chrono_literals;
+        std::unique_lock lock(mutex_);
+        cond_.wait_for(lock, 5s);
+    }
+
     delete ws_;
 }
 
@@ -206,7 +222,8 @@ void websocket_client::on_flow_control(const std::string_view &/*arg*/)
     // 命令类型：请求
     // 发送端：API网关
     // 没有其他参数，直接发送命令字
-    ws_->close();
+    ws_->stop();
+    ws_->start();
 }
 
 
@@ -217,7 +234,8 @@ void websocket_client::on_life_cycle(const std::string_view &/*arg*/)
     // 命令类型：请求
     // 发送端：API网关
     // 没有其他参数，直接发送命令字
-    ws_->close();
+    ws_->stop();
+    ws_->start();
 }
 
 
@@ -312,8 +330,17 @@ int websocket_client::post(const std::string &path, const ix::WebSocketHttpHeade
                            const ix::WebSocketHttpHeaders &body,
                            const ix::WebSocketHttpHeaders &headers)
 {
-    std::lock_guard lock(mutex_);
     auto req = make_request(ix::HttpClient::kPost, path, queries, body, headers);
+    ws_->sendText(req);
+    return seq_ - 1;
+}
+
+
+int websocket_client::del(const std::string &path, const ix::WebSocketHttpHeaders &queries,
+                          const ix::WebSocketHttpHeaders &body,
+                          const ix::WebSocketHttpHeaders &headers)
+{
+    auto req = make_request("DELETE", path, queries, body, headers);
     ws_->sendText(req);
     return seq_ - 1;
 }
@@ -325,11 +352,26 @@ void websocket_client::handle_response(const std::string &json)
     rapidjson::Document doc;
     doc.ParseInsitu(const_cast<char *>(json.c_str()));
 
+    if (doc.HasParseError())
+    {
+        return;
+    }
+
     auto status = get<int>(doc, "status");
     const auto &headers = doc["header"];
     auto seq = get<int>(headers, "x-ca-seq");
 
     if (seq == reg_seq_)
     {
+        if ((status / 100) == 2)
+        {
+            reg_seq_ = -1;
+            registered_ = true;
+        }
+    }
+    else if (seq == dereg_seq_)
+    {
+        registered_ = false;
+        cond_.notify_all();
     }
 }

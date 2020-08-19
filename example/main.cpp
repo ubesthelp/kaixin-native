@@ -22,6 +22,12 @@
 #endif
 
 
+static void kaixin_notification_callback(const kaixin_notification_arguments_t *args)
+{
+    std::cout << "Notification action: " << args->action << std::endl;
+}
+
+
 static inline bool has_error(int r, const char *action)
 {
     if (r != 0)
@@ -71,6 +77,9 @@ int main()
         }
 
         std::cout << "Signed in." << std::endl;
+
+
+        kaixin_set_notification_callback(kaixin_notification_callback);
 
 
         std::cout << "Getting lowest version." << std::endl;
