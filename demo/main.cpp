@@ -26,7 +26,7 @@
 using namespace std::chrono_literals;
 
 
-static void kaixin_notification_callback(const kaixin_notification_arguments_t *args)
+static void kaixin_notification_callback(const kaixin_notification_arguments_t *args, void *)
 {
     std::cout << "Notification action: " << args->action << std::endl;
 }
@@ -94,7 +94,7 @@ int main()
 
 
         // 设备授权应用在获取应用 ID 后设置通知回调
-        kaixin_set_notification_callback(kaixin_notification_callback);
+        kaixin_set_notification_callback(kaixin_notification_callback, nullptr);
         std::this_thread::sleep_for(5s);
 
 

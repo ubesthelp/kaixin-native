@@ -54,10 +54,11 @@ static inline void write_array(W &w, const K &key, const V &value)
 }
 
 
-websocket_client::websocket_client(kaixin_notification_callback_t callback)
+websocket_client::websocket_client(kaixin_notification_callback_t callback, void *user_data)
     : ws_(nullptr)
     , heartbeat_timer_(nullptr)
     , callback_(callback)
+    , user_data_(user_data)
     , seq_(0)
     , reg_seq_(-1)
     , dereg_seq_(-1)
@@ -211,7 +212,7 @@ void websocket_client::on_notify(const std::string_view &arg)
     {
         kaixin_notification_arguments_t args;
         rapidjson::get(args.action, doc, "action");
-        callback_(&args);
+        callback_(&args, user_data_);
     }
 }
 

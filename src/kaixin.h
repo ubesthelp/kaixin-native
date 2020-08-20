@@ -69,7 +69,7 @@ typedef struct kaixin_profile_s
     const char *username;                       ///< 用户名
     const char *email;                          ///< 电子邮箱
     const char *invitation_code;                ///< 邀请码（上级代理编号）
-    const char *secret;                         ///< 本地对称加密密钥
+    const char *secret;                         ///< 本地对称加密密钥，base64 编码二进制数据
     time_t access_token_expires_at;             ///< 访问令牌过期时间
     time_t refresh_token_expires_at;            ///< 更新令牌过期时间
     time_t id_token_expires_at;                 ///< 身份令牌过期时间
@@ -110,7 +110,7 @@ typedef struct kaixin_notification_arguments_s
 
 
 /// 下行通知回调函数
-typedef void(*kaixin_notification_callback_t)(const kaixin_notification_arguments_t *args);
+typedef void(*kaixin_notification_callback_t)(const kaixin_notification_arguments_t *args, void *user_data);
 
 
 /*!
@@ -223,10 +223,12 @@ KAIXIN_EXPORT const char *kaixin_get_material(const char *type);
  * \brief       设置下行通知回调函数。
  *
  * \param[in]   func        下行通知到达时要调用的函数
+ * \param[in]   user_data   用户数据，用于 `func` 最后一个参数
  *
  * \return      如果成功，则返回零；否则返回非零。
  */
-KAIXIN_EXPORT int kaixin_set_notification_callback(kaixin_notification_callback_t func);
+KAIXIN_EXPORT int kaixin_set_notification_callback(kaixin_notification_callback_t func,
+                                                   void *user_data);
 
 
 #ifdef __cplusplus

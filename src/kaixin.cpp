@@ -336,13 +336,13 @@ const char *kaixin_get_material(const char *type)
 }
 
 
-int kaixin_set_notification_callback(kaixin_notification_callback_t func)
+int kaixin_set_notification_callback(kaixin_notification_callback_t func, void *user_data)
 {
     if (g_config == nullptr || g_config->notify)
     {
         return EINVAL;
     }
 
-    g_config->notify = std::make_unique<websocket_client>(func);
+    g_config->notify = std::make_unique<websocket_client>(func, user_data);
     return 0;
 }

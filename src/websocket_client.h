@@ -34,7 +34,7 @@ class simple_timer;
 class websocket_client : private noncopyable
 {
 public:
-    explicit websocket_client(kaixin_notification_callback_t callback);
+    explicit websocket_client(kaixin_notification_callback_t callback, void *user_data);
     ~websocket_client();
 
 private:
@@ -69,6 +69,7 @@ private:
     ix::WebSocket *ws_;
     simple_timer *heartbeat_timer_;
     kaixin_notification_callback_t callback_;
+    void *user_data_;
     int seq_;
     int reg_seq_;
     int dereg_seq_;
