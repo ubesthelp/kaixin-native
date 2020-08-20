@@ -23,4 +23,3 @@ target_include_directories(${target} PRIVATE
 target_link_libraries(${target} PRIVATE
     kaixin
 )
-common_config(${target})

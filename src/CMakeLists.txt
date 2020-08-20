@@ -51,6 +51,7 @@ set_target_properties(${target} PROPERTIES
 )
 target_compile_features(${target} PRIVATE cxx_std_17)
 target_compile_definitions(${target} PRIVATE "RAPIDJSON_HAS_STDSTRING=1")
+target_compile_options(${target} PRIVATE ${PROJECT_WARNING_FLAGS})
 target_include_directories(${target} PRIVATE
     ${CMAKE_CURRENT_BINARY_DIR} ${RapidJSON_INCLUDE_DIRS} ${IXWEBSOCKET_INCLUDE_DIR}
 )
@@ -59,7 +60,7 @@ target_precompile_headers(${target} PRIVATE
     "<ixwebsocket/IXHttpClient.h>" "<ixwebsocket/IXWebSocket.h>"
     "<rapidjson/document.h>"
 )
-target_link_libraries(${target} PRIVATE
+target_link_libraries(${target}
     IXWebSocket
     CPPCODEC
 )
@@ -71,7 +72,23 @@ if(KAIXIN_BUILD_INTERNAL_API)
     target_compile_definitions(${target} PUBLIC "KAIXIN_BUILD_INTERNAL_API")
 endif()
 
-common_config(${target})
+if(NOT BUILD_SHARED_LIBS)
+    target_compile_definitions(${target} PUBLIC "KAIXIN_STATIC_DEFINE")
+endif()
+
+# Windows 特殊设置
+if(WIN32)
+    target_compile_definitions(${target} PRIVATE "WIN32_LEAN_AND_MEAN")
+    target_link_libraries(${target} "crypt32" "shlwapi" "ws2_32")
+endif()
+
+# MSVC 特殊设置
+include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag("/utf-8" HAVE_UTF_8)
+
+if(HAVE_UTF_8)
+    target_compile_options(${target} PRIVATE "/utf-8")
+endif()
 
 # 安装
 include(GNUInstallDirs)

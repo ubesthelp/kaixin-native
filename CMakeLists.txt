@@ -63,25 +63,9 @@ check_warning_flags(PROJECT_WARNING_FLAGS)
 #find_package(Themida REQUIRED)
 
 # 源代码
-function(common_config target)
-    target_compile_options(${target} PRIVATE ${PROJECT_WARNING_FLAGS})
-
-    # Windows 特殊设置
-    if(WIN32)
-        target_compile_definitions(${target} PRIVATE "WIN32_LEAN_AND_MEAN")
-        target_link_libraries(${target} PRIVATE
-            ws2_32.lib
-        )
-    endif()
-
-    # MSVC 特殊设置
-    if(MSVC)
-        target_compile_options(${target} PRIVATE "/utf-8")
-    endif()
-endfunction()
-
 add_subdirectory("src")
 
+# Demo
 if(BUILD_DEMO)
     add_subdirectory("demo")
     set_directory_properties(PROPERTIES VS_STARTUP_PROJECT kaixin-demo)

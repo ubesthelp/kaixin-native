@@ -14,19 +14,16 @@ mark_as_advanced(
 
 if(IXWebSocket_FOUND AND NOT TARGET IXWebSocket)
     find_package(ZLIB REQUIRED)
-    add_library(IXWebSocket INTERFACE)
-    target_include_directories(IXWebSocket SYSTEM INTERFACE "${IXWebSocket_INCLUDE_DIR}")
-    target_link_libraries(IXWebSocket INTERFACE "${IXWebSocket_LIBRARY}" ZLIB::ZLIB)
-
-    find_package(OpenSSL)
-    
-    if(OpenSSL_FOUND)
-        target_link_libraries(IXWebSocket INTERFACE OpenSSL::SSL OpenSSL::Crypto)
-    else()
-        message(WARNING "No SSL library found.")
-    endif()
+    find_package(OpenSSL REQUIRED)
+    add_library(IXWebSocket UNKNOWN IMPORTED)
+    set_target_properties(IXWebSocket PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${IXWebSocket_INCLUDE_DIR}"
+        IMPORTED_LOCATION "${IXWebSocket_LIBRARY}"
+        INTERFACE_LINK_LIBRARIES "ZLIB::ZLIB;OpenSSL::SSL;OpenSSL::Crypto"
+    )
 
     if(WIN32)
-        target_link_libraries(IXWebSocket INTERFACE "crypt32.lib" "shlwapi.lib")
+        set_property(TARGET IXWebSocket APPEND PROPERTY
+            INTERFACE_LINK_LIBRARIES "crypt32.lib;shlwapi.lib;ws2_32.lib")
     endif()
 endif()
