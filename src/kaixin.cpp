@@ -218,8 +218,10 @@ kaixin_auth_t * kaixin_get_auth()
     {
         using rapidjson::get;
         auto *prev = auth;
+        get(g_config->secret, data, "secret");
+        g_profile->secret = g_config->secret.c_str();
 
-        for (const auto &a : data.GetArray())
+        for (const auto &a : data["auth"].GetArray())
         {
             auto *p = new kaixin_auth_t;
             p->next = nullptr;
