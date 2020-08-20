@@ -16,7 +16,10 @@ set(target kaixin-demo)
 add_executable(${target}
     main.cpp appkey.h
 )
-
+target_include_directories(${target} PRIVATE
+    "${PROJECT_SOURCE_DIR}/src"
+    "${PROJECT_BINARY_DIR}/src"
+)
 target_link_libraries(${target} PRIVATE
     kaixin
 )

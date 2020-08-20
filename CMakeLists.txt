@@ -84,6 +84,7 @@ add_subdirectory("src")
 
 if(BUILD_DEMO)
     add_subdirectory("demo")
+    set_directory_properties(PROPERTIES VS_STARTUP_PROJECT kaixin-demo)
 endif()
 
 # 打包，提前设置供安装库使用。
