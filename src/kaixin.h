@@ -11,22 +11,11 @@
  *
  **************************************************************************************************/
 #pragma once
+#include "kaixin_export.h"
+
 #include <stdint.h>
 #include <time.h>
 
-#ifdef KAIXIN_EXPORTS
-#ifdef _MSC_VER
-#define KAIXIN_API      __declspec(dllexport)
-#else
-#define KAIXIN_API      __attribute__((__visibility__("default")))
-#endif
-#else
-#ifdef _MSC_VER
-#define KAIXIN_API      __declspec(dllimport)
-#else
-#define KAIXIN_API
-#endif
-#endif
 
 // 用于测试的基础 URL。
 #define KAIXIN_BASE_URL_FOR_TESTING     "https://api-v3-test.hlwcr.cn"
@@ -136,15 +125,15 @@ typedef void(*kaixin_notification_callback_t)(const kaixin_notification_argument
  *
  * \return      如果成功，则返回零；否则返回非零。
  */
-KAIXIN_API int kaixin_initialize(const char *organization, const char *application,
-                                 const char *app_key, const char *app_secret, const char *base_url);
+KAIXIN_EXPORT int kaixin_initialize(const char *organization, const char *application,
+                                    const char *app_key, const char *app_secret, const char *base_url);
 
 
 
 /*!
  * \brief       反初始化开心 SDK。
  */
-KAIXIN_API void kaixin_uninitialize();
+KAIXIN_EXPORT void kaixin_uninitialize();
 
 
 /*!
@@ -155,7 +144,7 @@ KAIXIN_API void kaixin_uninitialize();
  *
  * \return      如果成功，则返回零；否则返回非零。
  */
-KAIXIN_API int kaixin_sign_in(const char *username, const char *password);
+KAIXIN_EXPORT int kaixin_sign_in(const char *username, const char *password);
 
 
 /*!
@@ -163,7 +152,7 @@ KAIXIN_API int kaixin_sign_in(const char *username, const char *password);
  *
  * \return      如果成功，则返回零；否则返回非零。
  */
-KAIXIN_API int kaixin_sign_out();
+KAIXIN_EXPORT int kaixin_sign_out();
 
 
 /*!
@@ -171,7 +160,7 @@ KAIXIN_API int kaixin_sign_out();
  *
  * \return      如果登录成功，则返回用户配置文件；否则返回 `NULL`。
  */
-KAIXIN_API const kaixin_profile_t *kaixin_get_profile();
+KAIXIN_EXPORT const kaixin_profile_t *kaixin_get_profile();
 
 
 /*!
@@ -179,7 +168,7 @@ KAIXIN_API const kaixin_profile_t *kaixin_get_profile();
  *
  * \return      如果成功，则返回设备 ID；否则返回 `NULL`。
  */
-KAIXIN_API const char *kaixin_get_device_id();
+KAIXIN_EXPORT const char *kaixin_get_device_id();
 
 
 /*!
@@ -187,7 +176,7 @@ KAIXIN_API const char *kaixin_get_device_id();
  *
  * \return      应用授权；如果没有授权，则返回 `NULL`。返回的指针需要调用 `kaixin_free_auth` 函数释放。
  */
-KAIXIN_API kaixin_auth_t *kaixin_get_auth();
+KAIXIN_EXPORT kaixin_auth_t *kaixin_get_auth();
 
 
 /*!
@@ -195,7 +184,7 @@ KAIXIN_API kaixin_auth_t *kaixin_get_auth();
  *
  * \param[in]   auth        要释放的链表。
  */
-KAIXIN_API void kaixin_free_auth(kaixin_auth_t *auth);
+KAIXIN_EXPORT void kaixin_free_auth(kaixin_auth_t *auth);
 
 
 /*!
@@ -206,7 +195,7 @@ KAIXIN_API void kaixin_free_auth(kaixin_auth_t *auth);
  * \note        此函数可在登录前调用。
  * \return      应用最低版本号。
  */
-KAIXIN_API kaixin_version_t kaixin_get_lowest_version();
+KAIXIN_EXPORT kaixin_version_t kaixin_get_lowest_version();
 
 
 /*!
@@ -227,7 +216,7 @@ KAIXIN_API kaixin_version_t kaixin_get_lowest_version();
  * \sa          `KAIXIN_MATERIAL_DOWNLOAD`
  * \sa          `KAIXIN_MATERIAL_IMPORT_TEMPLATES`
  */
-KAIXIN_API const char *kaixin_get_material(const char *type);
+KAIXIN_EXPORT const char *kaixin_get_material(const char *type);
 
 
 /*!
@@ -237,7 +226,7 @@ KAIXIN_API const char *kaixin_get_material(const char *type);
  *
  * \return      如果成功，则返回零；否则返回非零。
  */
-KAIXIN_API int kaixin_set_notification_callback(kaixin_notification_callback_t func);
+KAIXIN_EXPORT int kaixin_set_notification_callback(kaixin_notification_callback_t func);
 
 
 #ifdef __cplusplus

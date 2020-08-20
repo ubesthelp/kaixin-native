@@ -13,7 +13,7 @@
 
 # 添加项目
 set(target kaixin)
-add_library(${target} SHARED
+add_library(${target}
     authorization_disabler.h
     fingerprint.h fingerprint.cpp
     jwt.h jwt.cpp
@@ -30,6 +30,10 @@ if(WIN32)
     target_sources(${target} PRIVATE wmi_client.h wmi_client.cpp)
 endif()
 
+# 生成导出头文件
+include(GenerateExportHeader)
+generate_export_header(${target})
+
 # 查找依赖库
 # RapidJSON
 find_package(RapidJSON CONFIG REQUIRED)
@@ -42,12 +46,13 @@ find_package(CPPCODEC REQUIRED)
 
 # 设置编译选项，链接依赖库
 set_target_properties(${target} PROPERTIES
-    DEFINE_SYMBOL "KAIXIN_EXPORTS"
+    VERSION ${PROJECT_VERSION}
+    SOVERSION ${PROJECT_VERSION_MAJOR}
 )
 target_compile_features(${target} PRIVATE cxx_std_17)
 target_compile_definitions(${target} PRIVATE "RAPIDJSON_HAS_STDSTRING=1")
-target_include_directories(${target} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
-    PRIVATE ${RapidJSON_INCLUDE_DIRS} ${IXWEBSOCKET_INCLUDE_DIR}
+target_include_directories(${target} PRIVATE
+    ${CMAKE_CURRENT_BINARY_DIR} ${RapidJSON_INCLUDE_DIRS} ${IXWEBSOCKET_INCLUDE_DIR}
 )
 target_precompile_headers(${target} PRIVATE
     "<map>" "<string>" "<vector>"
@@ -67,3 +72,33 @@ if(KAIXIN_BUILD_INTERNAL_API)
 endif()
 
 common_config(${target})
+
+# 安装
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+configure_package_config_file("${target}Config.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/${target}Config.cmake"
+    INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${target}"
+)
+write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/${target}ConfigVersion.cmake"
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+install(TARGETS ${target} EXPORT ${target}Targets
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+install(FILES "kaixin.h" "${CMAKE_CURRENT_BINARY_DIR}/kaixin_export.h"
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    COMPONENT Devel
+)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${target}Config.cmake" "${CMAKE_CURRENT_BINARY_DIR}/${target}ConfigVersion.cmake"
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${target}"
+)
+install(EXPORT ${target}Targets
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${target}"
+    NAMESPACE "${target}::"
+    FILE ${target}Targets.cmake
+)

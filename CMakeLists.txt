@@ -30,7 +30,7 @@ set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS Debug Release)
 set(VCPKG_TARGET_TRIPLET $ENV{VCPKG_DEFAULT_TRIPLET} CACHE STRING "VCPKG Target Triplet to use")
 
 # 开心 C SDK
-project(kaixin VERSION 0.0.1)
+project(kaixin VERSION 0.1)
 
 # 检查是否支持 IPO
 if(POLICY CMP0069)
@@ -51,9 +51,9 @@ else()
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE OFF)
 endif()
 
-# 判断目标架构
-include(TargetArch)
-target_architecture(PROJECT_TARGET_ARCH)
+# 是否编译示例程序
+option(BUILD_SHARED_LIBS "Build shared libraries")
+option(BUILD_DEMO "Build the demo" OFF)
 
 # 检查编译器警告选项
 include(WarningFlags)
@@ -81,7 +81,10 @@ function(common_config target)
 endfunction()
 
 add_subdirectory("src")
-add_subdirectory("example")
+
+if(BUILD_DEMO)
+    add_subdirectory("demo")
+endif()
 
 # 打包，提前设置供安装库使用。
 set(CPACK_PACKAGE_NAME "${PROJECT_NAME}-all")
