@@ -127,6 +127,11 @@ static int sign_in_handler(const rapidjson::Value &data)
     {
         g_config->agent_code = utils::get_local_agent_code();
     }
+    else if (g_config->agent_code != utils::get_current_locale())
+    {
+        // 如果代理编号变了，则清空素材。
+        g_config->materials.clear();
+    }
 
     assert(g_profile == nullptr);
     g_profile = new kaixin_profile_t;
