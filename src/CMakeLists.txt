@@ -72,7 +72,12 @@ if(KAIXIN_BUILD_INTERNAL_API)
     target_compile_definitions(${target} PUBLIC "KAIXIN_BUILD_INTERNAL_API")
 endif()
 
-if(NOT BUILD_SHARED_LIBS)
+if(BUILD_SHARED_LIBS)
+    if(MSVC)
+        configure_file(kaixin.rc.in kaixin.rc @ONLY)
+        target_sources(${target} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/kaixin.rc")
+    endif()
+else()
     target_compile_definitions(${target} PUBLIC "KAIXIN_STATIC_DEFINE")
 endif()
 
@@ -89,6 +94,7 @@ check_cxx_compiler_flag("/utf-8" HAVE_UTF_8)
 if(HAVE_UTF_8)
     target_compile_options(${target} PRIVATE "/utf-8")
 endif()
+
 
 # 安装
 include(GNUInstallDirs)
