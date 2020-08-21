@@ -31,6 +31,9 @@ if(WIN32)
     target_sources(${target} PRIVATE wmi_client.h wmi_client.cpp)
 endif()
 
+configure_file(kaixin_version.h.in kaixin_version.h @ONLY)
+target_sources(${target} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/kaixin_version.h")
+
 # 生成导出头文件
 include(GenerateExportHeader)
 generate_export_header(${target})

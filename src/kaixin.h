@@ -128,6 +128,12 @@ typedef void(*kaixin_log_output_t)(const char *msg, kaixin_log_severity_t severi
 
 
 /*!
+ * \brief       获取开心 C SDK 版本号。
+ */
+KAIXIN_EXPORT const char * kaixin_version();
+
+
+/*!
  * \brief       设置日志输出函数。
  *
  * \param[in]   output          新的日志输出函数

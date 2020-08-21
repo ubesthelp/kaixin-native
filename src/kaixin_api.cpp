@@ -15,6 +15,7 @@
 #include <openssl/hmac.h>
 #include <ixwebsocket/IXHttpClient.h>
 
+#include "kaixin_version.h"
 #include "logger.h"
 #include "rapidjsonhelpers.h"
 #include "utils.h"
@@ -139,6 +140,9 @@ int send_request(const std::string &verb, const std::string &path, const string_
         // 设置认证头
         args->extraHeaders.emplace("Authorization", "Bearer " + g_config->id_token);
     }
+
+    // User agent
+    //args->extraHeaders.emplace("User-Agent", "kaixin-native/" KAIXIN_VERSION_STRING);
 
     // 构造请求体，并发送请求
     auto body = make_form(form);

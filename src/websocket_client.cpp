@@ -19,6 +19,7 @@
 #include <rapidjson/writer.h>
 
 #include "kaixin_api.h"
+#include "kaixin_version.h"
 #include "rapidjsonhelpers.h"
 #include "simple_timer.h"
 #include "utils.h"
@@ -100,6 +101,7 @@ void websocket_client::create_socket()
 {
     delete ws_;
     ws_ = new ix::WebSocket;
+    //ws_->setExtraHeaders({ {"User-Agent", "kaixin-native/" KAIXIN_VERSION_STRING } });
     ws_->setUrl("ws://" + get_host(g_config->base_url) + ":8080/");
     ws_->setOnMessageCallback(std::bind(&websocket_client::on_message_callback, this, _1));
     ws_->start();

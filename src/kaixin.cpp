@@ -18,6 +18,7 @@
 #include "fingerprint.h"
 #include "jwt.h"
 #include "kaixin_api.h"
+#include "kaixin_version.h"
 #include "logger.h"
 #include "rapidjsonhelpers.h"
 #include "utils.h"
@@ -150,6 +151,12 @@ static void refresh_token()
 }
 
 
+const char * kaixin_version()
+{
+    return KAIXIN_VERSION_STRING;
+}
+
+
 // 设置日志输出函数。
 kaixin_log_output_t kaixin_set_log_output(kaixin_log_output_t output)
 {
@@ -183,7 +190,7 @@ int kaixin_initialize(const char *organization, const char *application, const c
         return EINVAL;
     }
 
-    LD() << "Initializing kaixin native SDK.";
+    LD() << "Initializing kaixin native SDK " KAIXIN_VERSION_STRING ".";
     g_config = new kaixin::Config;
     _ASSERT(g_config != nullptr);
     g_config->organization = organization;
