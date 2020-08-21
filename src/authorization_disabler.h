@@ -1,7 +1,7 @@
 ﻿/*! ***********************************************************************************************
  *
  * \file        authorization_disabler.h
- * \brief       AuthorizationDisabler 类头文件。
+ * \brief       authorization_disabler 类头文件。
  *
  * \version     0.1
  * \date        2020-08-14
@@ -11,15 +11,16 @@
  *
  **************************************************************************************************/
 #pragma once
+#include "noncopyable.h"
 #include "kaixin_api.h"
 
 namespace kaixin {
 
 
-class AuthorizationDisabler
+class authorization_disabler : private noncopyable
 {
 public:
-    AuthorizationDisabler()
+    authorization_disabler()
         : aExp_(g_config->access_token_expires_at)
         , idExp_(g_config->id_token_expires_at)
     {
@@ -27,16 +28,11 @@ public:
         g_config->id_token_expires_at = 0;
     }
 
-    ~AuthorizationDisabler()
+    ~authorization_disabler()
     {
         g_config->access_token_expires_at = aExp_;
         g_config->id_token_expires_at = idExp_;
     }
-
-    AuthorizationDisabler(const AuthorizationDisabler &) = delete;
-    AuthorizationDisabler(AuthorizationDisabler &&) = delete;
-    AuthorizationDisabler &operator=(const AuthorizationDisabler &) = delete;
-    AuthorizationDisabler &operator=(AuthorizationDisabler &&) = delete;
 
 private:
     const time_t aExp_;

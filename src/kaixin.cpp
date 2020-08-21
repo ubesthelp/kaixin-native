@@ -147,6 +147,8 @@ static void refresh_token()
         { "refresh_token", g_config->refresh_token }
     };
 
+    g_config->access_token_expires_at = 0;
+    g_config->id_token_expires_at = 0;
     kaixin::send_request(ix::HttpClient::kPatch, "/session", form, sign_in_handler);
 }
 
@@ -374,7 +376,7 @@ kaixin_version_t kaixin_get_lowest_version()
 {
     kaixin_version_t lowest = { 0, 0, 0 };
 
-    kaixin::AuthorizationDisabler atd;
+    kaixin::authorization_disabler atd;
     kaixin::send_request(ix::HttpClient::kGet, "/lowest-version", [&lowest](const rapidjson::Value &data)
     {
         get(lowest.major, data, "major");

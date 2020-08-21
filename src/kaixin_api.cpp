@@ -148,9 +148,20 @@ int send_request(const std::string &verb, const std::string &path, const string_
     auto body = make_form(form);
     auto resp = http.request(url, verb, body, args);
 
+#ifndef NDEBUG
+    for (const auto &[key, value] : resp->headers)
+    {
+        LD() << key + ":" << value;
+    }
+
+    LD() << " ";
+    LD() << resp->payload;
+#endif
+
     if (resp->payload.empty())
     {
         // 响应为空
+        LW() << "Empty body.";
         return -1;
     }
 
@@ -161,6 +172,7 @@ int send_request(const std::string &verb, const std::string &path, const string_
     if (doc.HasParseError())
     {
         // 响应内容不是合法 JSON
+        LE() << "Not a JSON string.";
         return -1;
     }
 
