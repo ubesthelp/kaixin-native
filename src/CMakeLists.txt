@@ -19,6 +19,7 @@ add_library(${target}
     jwt.h jwt.cpp
     kaixin.h kaixin.cpp
     kaixin_api.h kaixin_api.cpp
+    logger.h logger.cpp
     noncopyable.h
     rapidjsonhelpers.h
     simple_timer.h simple_timer.cpp

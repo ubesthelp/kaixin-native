@@ -18,6 +18,7 @@
 #include "fingerprint.h"
 #include "jwt.h"
 #include "kaixin_api.h"
+#include "logger.h"
 #include "rapidjsonhelpers.h"
 #include "utils.h"
 
@@ -102,7 +103,7 @@ static int sign_in_handler(const rapidjson::Value &data)
         g_config->materials.clear();
     }
 
-    assert(g_profile == nullptr);
+    delete g_profile;
     g_profile = new kaixin_profile_t;
     memset(g_profile, 0, sizeof(kaixin_profile_t));
     g_profile->access_token = g_config->access_token.c_str();
@@ -149,6 +150,13 @@ static void refresh_token()
 }
 
 
+// 设置日志输出函数。
+kaixin_log_output_t kaixin_set_log_output(kaixin_log_output_t output)
+{
+    return logger::set_output(output);
+}
+
+
 // 初始化
 int kaixin_initialize(const char *organization, const char *application, const char *app_key,
                       const char *app_secret, const char *base_url)
@@ -156,6 +164,7 @@ int kaixin_initialize(const char *organization, const char *application, const c
     if (g_config != nullptr)
     {
         // 已经初始化过了
+        LE() << "Kaixin SDK is already initialized.";
         return EPERM;
     }
 
@@ -163,15 +172,18 @@ int kaixin_initialize(const char *organization, const char *application, const c
         || utils::is_empty(app_key) || utils::is_empty(app_secret))
     {
         // 组织名、应用名、APP KEY 或 SECRET 为空
+        LE() << "Applicatoin parameters are empty.";
         return EINVAL;
     }
 
     if (!utils::is_empty(base_url) && strstr(base_url, "https://") != base_url)
     {
         // 基础 URL 必须是 HTTPS 协议
+        LE() << "The base URL must use HTTPS protocol.";
         return EINVAL;
     }
 
+    LD() << "Initializing kaixin native SDK.";
     g_config = new kaixin::Config;
     _ASSERT(g_config != nullptr);
     g_config->organization = organization;
@@ -200,6 +212,7 @@ int kaixin_initialize(const char *organization, const char *application, const c
     // 加载上次保存的更新令牌
     if (load_refresh_token())
     {
+        LI() << "Loaded token from last session.";
         refresh_token();
     }
 

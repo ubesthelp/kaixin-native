@@ -60,6 +60,17 @@ typedef enum kaixin_user_status_e
 } kaixin_user_status_t;
 
 
+/// \brief      日志严重性等级。
+typedef enum kaixin_log_severity_e
+{
+    KAIXIN_SEVERITY_DEBUG,
+    KAIXIN_SEVERITY_INFO,
+    KAIXIN_SEVERITY_WARNING,
+    KAIXIN_SEVERITY_ERROR,
+    KAIXIN_SEVERITY_CRITICAL,
+} kaixin_log_severity_t;
+
+
 /// \brief      用户配置，登录成功后获取。
 typedef struct kaixin_profile_s
 {
@@ -111,6 +122,19 @@ typedef struct kaixin_notification_arguments_s
 
 /// 下行通知回调函数
 typedef void(*kaixin_notification_callback_t)(const kaixin_notification_arguments_t *args, void *user_data);
+
+/// 日志输出函数
+typedef void(*kaixin_log_output_t)(const char *msg, kaixin_log_severity_t severity);
+
+
+/*!
+ * \brief       设置日志输出函数。
+ *
+ * \param[in]   output          新的日志输出函数
+ *
+ * \return      上一个日志输出函数；如果没有，则返回 `NULL`。
+ */
+KAIXIN_EXPORT kaixin_log_output_t kaixin_set_log_output(kaixin_log_output_t output);
 
 
 /*!

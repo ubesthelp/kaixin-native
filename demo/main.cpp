@@ -45,10 +45,18 @@ static inline bool has_error(int r, const char *action)
 }
 
 
+static void log_output(const char *msg, kaixin_log_severity_t)
+{
+    std::clog << "[kaixin] " << msg << std::endl;
+}
+
+
 int main()
 {
     do
     {
+        kaixin_set_log_output(log_output);
+
         std::cout << "Initializing." << std::endl;
         auto r = kaixin_initialize(APP_ORG, APP_NAME, APP_KEY, APP_SECRET,
                                    KAIXIN_BASE_URL_FOR_TESTING);

@@ -15,6 +15,7 @@
 #include <openssl/hmac.h>
 #include <ixwebsocket/IXHttpClient.h>
 
+#include "logger.h"
 #include "rapidjsonhelpers.h"
 #include "utils.h"
 
@@ -127,6 +128,11 @@ int send_request(const std::string &verb, const std::string &path, const string_
 
     ix::HttpClient http;
     auto args = http.createRequest();
+    args->logger = [](const std::string &msg) { logger::debug(msg.c_str()); };
+
+#ifndef NDEBUG
+    args->verbose = true;
+#endif
 
     if (!g_config->id_token.empty() && g_config->id_token_expires_at >= now)
     {
