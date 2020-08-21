@@ -67,8 +67,8 @@ int main()
         }
 
 
-        //std::cout << "Getting materials." << std::endl;
-        //std::cout << "Bottem-left ad: " << kaixin_get_material(KAIXIN_MATERIAL_AD_BOTTOMLEFT_IMAGE_LARGE) << std::endl;
+        std::cout << "Getting materials." << std::endl;
+        std::cout << "Bottem-left ad: " << kaixin_get_material(KAIXIN_MATERIAL_AD_BOTTOMLEFT_IMAGE_LARGE) << std::endl;
 
 
         std::string username;

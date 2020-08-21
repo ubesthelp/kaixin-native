@@ -153,7 +153,7 @@ static void refresh_token()
 }
 
 
-const char * kaixin_version()
+const char *kaixin_version()
 {
     return KAIXIN_VERSION_STRING;
 }
@@ -313,7 +313,7 @@ const char *kaixin_get_device_id()
 
 
 // 获取授权
-kaixin_auth_t * kaixin_get_auth()
+kaixin_auth_t *kaixin_get_auth()
 {
     kaixin_auth_t *auth = nullptr;
 
@@ -413,7 +413,6 @@ const char *kaixin_get_material(const char *type)
     // 获取素材
     kaixin::string_map queries{
         { "locale", utils::get_current_locale() },
-        { "agent_code", g_config->agent_code.empty() ? utils::get_local_agent_code() : g_config->agent_code },
     };
 
     kaixin::send_request(ix::HttpClient::kGet, "/materials", queries, {}, [](const rapidjson::Value &data)
@@ -422,9 +421,9 @@ const char *kaixin_get_material(const char *type)
 
         for (const auto &e : data.GetArray())
         {
-            auto name = get<std::string>(e, "name");
+            auto type = get<std::string>(e, "type");
             auto text = get<std::string>(e, "text");
-            g_config->materials.emplace(name, text);
+            g_config->materials.emplace(type, text);
         }
 
         return 0;
