@@ -58,15 +58,29 @@ std::string to_hex(const uint8_t *buffer, size_t length);
 
 
 /*!
+ * \brief       获取当时时间数。
+ *
+ * \tparam      U           时间单位，默认为秒
+ *
+ * \return      UNIX 时间。
+ */
+template<typename U = std::chrono::seconds>
+inline constexpr int64_t get_timestamp()
+{
+    using namespace std::chrono;
+    auto t = time_point_cast<U>(system_clock::now());
+    return t.time_since_epoch().count();
+}
+
+
+/*!
  * \brief       获取当时时间毫秒数。
  *
  * \return      UNIX 时间，毫秒。
  */
-inline constexpr int64_t get_timestamp()
+inline constexpr int64_t get_timestamp_ms()
 {
-    using namespace std::chrono;
-    auto ms = time_point_cast<milliseconds>(system_clock::now());
-    return ms.time_since_epoch().count();
+    return get_timestamp<std::chrono::milliseconds>();
 }
 
 
@@ -206,6 +220,16 @@ inline T get_reg_type_value(const std::string &value_name, const T &default_valu
  * \return      如果设置成功，则返回 `true`；否则返回 `false`。
  */
 bool set_reg_value(const std::string &value_name, const reg_value &value);
+
+
+/*!
+ * \brief       设置注册表值。
+ *
+ * \param[in]   value_name      值名称
+ *
+ * \return      如果删除成功，则返回 `true`；否则返回 `false`。
+ */
+bool delete_reg_value(const std::string &value_name);
 
 
 /*!

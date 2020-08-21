@@ -105,7 +105,7 @@ int send_request(const std::string &verb, const std::string &path, const string_
     assert(!verb.empty() && !path.empty() && path.at(0) == '/');
 
     // 设置公共参数：k、t、z
-    auto now = utils::get_timestamp();
+    auto now = utils::get_timestamp_ms();
     string_map params = queries;
     params.emplace("k", g_config->app_key);
     params.emplace("t", std::to_string(now));

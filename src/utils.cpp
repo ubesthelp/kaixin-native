@@ -181,7 +181,7 @@ std::wstring to_wide(const std::string &narrow)
 }
 
 
-reg_value get_reg_value(const std::string &value_name, const reg_value &default_value /*= {}*/)
+static bool get_reg_value(HKEY root, const std::string &value_name, reg_value &value)
 {
     std::wstring subkey(L"SOFTWARE\\");
     subkey += to_wide(g_config->organization);
@@ -191,39 +191,48 @@ reg_value get_reg_value(const std::string &value_name, const reg_value &default_
     auto wide_name = to_wide(value_name);
     DWORD dwType = 0;
     DWORD cbData = 0;
-    RegGetValueW(HKEY_LOCAL_MACHINE, subkey.c_str(), wide_name.c_str(), RRF_RT_ANY, &dwType, NULL,
-                 &cbData);
+    auto r = RegGetValueW(root, subkey.c_str(), wide_name.c_str(), RRF_RT_ANY, &dwType, NULL, &cbData);
 
-    if (cbData == 0)
+    if (r != ERROR_SUCCESS && r != ERROR_MORE_DATA)
     {
-        return default_value;
+        return false;
     }
 
-    std::vector<uint8_t> value(cbData, 0);
-    RegGetValueW(HKEY_LOCAL_MACHINE, subkey.c_str(), wide_name.c_str(), RRF_RT_ANY, NULL,
-                 value.data(), &cbData);
-
-    reg_value rvalue;
+    std::vector<uint8_t> binary(cbData, 0);
+    RegGetValueW(root, subkey.c_str(), wide_name.c_str(), RRF_RT_ANY, NULL, binary.data(), &cbData);
 
     switch (dwType)
     {
     case REG_SZ:
-        rvalue = to_narrow(reinterpret_cast<wchar_t *>(value.data()));
+        value = to_narrow(reinterpret_cast<wchar_t *>(binary.data()));
         break;
     case REG_BINARY:
-        rvalue = std::move(value);
+        value = std::move(binary);
         break;
     case REG_DWORD:
-        rvalue = *reinterpret_cast<uint32_t *>(value.data());
+        value = *reinterpret_cast<uint32_t *>(binary.data());
         break;
     case REG_QWORD:
-        rvalue = *reinterpret_cast<int64_t *>(value.data());
+        value = *reinterpret_cast<int64_t *>(binary.data());
         break;
     default:
-        break;
+        return false;
     }
 
-    return rvalue;
+    return true;
+}
+
+reg_value get_reg_value(const std::string &value_name, const reg_value &default_value /*= {}*/)
+{
+    reg_value result;
+
+    if (get_reg_value(HKEY_CURRENT_USER, value_name, result)
+        || get_reg_value(HKEY_LOCAL_MACHINE, value_name, result))
+    {
+        return result;
+    }
+
+    return default_value;
 }
 
 
@@ -273,6 +282,19 @@ bool set_reg_value(const std::string &value_name, const reg_value &value)
 
     auto r = RegSetKeyValueW(HKEY_CURRENT_USER, subkey.c_str(), wide_name.c_str(), dwType, data,
                              cbData);
+    return r == ERROR_SUCCESS;
+}
+
+
+bool delete_reg_value(const std::string &value_name)
+{
+    std::wstring subkey(L"SOFTWARE\\");
+    subkey += to_wide(g_config->organization);
+    subkey += L"\\";
+    subkey += to_wide(g_config->application);
+
+    auto wide_name = to_wide(value_name);
+    auto r = RegDeleteKeyValueW(HKEY_CURRENT_USER, subkey.c_str(), wide_name.c_str());
     return r == ERROR_SUCCESS;
 }
 

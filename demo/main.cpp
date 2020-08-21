@@ -66,21 +66,30 @@ int main()
         std::string username;
         std::string password;
 
-        std::cout << "Input username: ";
-        std::cin >> username;
+        auto *profile = kaixin_get_profile();
 
-        std::cout << "Input password: ";
-        std::cin >> password;
-
-        std::cout << "Signing in." << std::endl;
-        r = kaixin_sign_in(username.c_str(), password.c_str());
-
-        if (has_error(r, "sign in"))
+        if (profile == nullptr || profile->username == nullptr)
         {
-            break;
-        }
+            std::cout << "Input username: ";
+            std::cin >> username;
 
-        std::cout << "Signed in." << std::endl;
+            std::cout << "Input password: ";
+            std::cin >> password;
+
+            std::cout << "Signing in." << std::endl;
+            r = kaixin_sign_in(username.c_str(), password.c_str());
+
+            if (has_error(r, "sign in"))
+            {
+                break;
+            }
+
+            std::cout << "Signed in." << std::endl;
+        }
+        else
+        {
+            std::cout << "Already signed in: " << profile->username << std::endl;
+        }
 
 
         std::cout << "Getting lowest version." << std::endl;
@@ -215,13 +224,13 @@ int main()
 #endif
 
 
-        std::cout << "Signing out." << std::endl;
-        r = kaixin_sign_out();
+        //std::cout << "Signing out." << std::endl;
+        //r = kaixin_sign_out();
 
-        if (r != 0)
-        {
-            std::cerr << "Failed to sign out:" << r << std::endl;
-        }
+        //if (r != 0)
+        //{
+        //    std::cerr << "Failed to sign out:" << r << std::endl;
+        //}
     } while (false);
 
     std::cout << "Uninitializing." << std::endl;

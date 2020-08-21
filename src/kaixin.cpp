@@ -20,7 +20,6 @@
 #include "kaixin_api.h"
 #include "rapidjsonhelpers.h"
 #include "utils.h"
-#include "websocket_client.h"
 
  // 纠正 EINVAL 被重定义为 WSAEINVAL 的问题。
 #ifdef KAIXIN_OS_WINDOWS
@@ -35,8 +34,10 @@ kaixin_profile_t *g_profile = nullptr;
 // 加载更新令牌
 static bool load_refresh_token()
 {
+#ifdef KAIXIN_OS_WINDOWS
     auto expires_at = utils::get_reg_type_value<int64_t>("kaixin::expires_at");
     auto binary = utils::get_reg_type_value<std::vector<uint8_t>>("kaixin::token");
+#endif
 
     if (g_config == nullptr || binary.empty() || expires_at < utils::get_timestamp())
     {
@@ -54,16 +55,20 @@ static void save_refresh_token()
         && g_config->refresh_token_expires_at > utils::get_timestamp())
     {
         auto binary = utils::protect_data(g_config->refresh_token);
+#ifdef KAIXIN_OS_WINDOWS
         utils::set_reg_value("kaixin::token", binary);
         utils::set_reg_value("kaixin::expires_at", g_config->refresh_token_expires_at);
+#endif
     }
 }
+
+static void refresh_token();
 
 // 处理登录
 static int sign_in_handler(const rapidjson::Value &data)
 {
     using rapidjson::get;
-    auto now = time(nullptr);
+    auto now = utils::get_timestamp();
     get(g_config->access_token, data, "access_token");
     get(g_config->refresh_token, data, "refresh_token");
     get(g_config->id_token, data, "id_token");
@@ -81,7 +86,7 @@ static int sign_in_handler(const rapidjson::Value &data)
     using rapidjson::get;
     rapidjson::Document doc;
     doc.ParseInsitu(payload.data());
-    get(g_config->username, doc, "sub");
+    get(g_config->username, doc, "name");
     get(g_config->email, doc, "email");
     get(g_config->agent_code, doc, "agent_code");
     get(g_config->secret, doc, "secret");
@@ -114,22 +119,33 @@ static int sign_in_handler(const rapidjson::Value &data)
 
     // 保存令牌
     save_refresh_token();
+
+    if (!g_config->token_refresher)
+    {
+        // 自动更新令牌
+        g_config->token_refresher = std::make_unique<simple_timer>();
+        g_config->token_refresher->set_timeout_callback(refresh_token);
+
+        auto refresh_in = get<int>(data, "expires_in") * 3000 / 4;
+        g_config->token_refresher->start(refresh_in);
+    }
+
     return 0;
 }
 
 // 更新令牌
-static int refresh_token()
+static void refresh_token()
 {
     if (g_config == nullptr)
     {
-        return EINVAL;
+        return;
     }
 
     kaixin::string_map form{
         { "refresh_token", g_config->refresh_token }
     };
 
-    return kaixin::send_request(ix::HttpClient::kPatch, "/session", form, sign_in_handler);
+    kaixin::send_request(ix::HttpClient::kPatch, "/session", form, sign_in_handler);
 }
 
 
@@ -230,6 +246,11 @@ int kaixin_sign_out()
     }
 
     g_config->notify.reset();
+
+#ifdef KAIXIN_OS_WINDOWS
+    utils::delete_reg_value("kaixin::token");
+    utils::delete_reg_value("kaixin::expires_at");
+#endif
 
     return kaixin::send_request("DELETE", "/session");
 }

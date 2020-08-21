@@ -263,7 +263,7 @@ std::string websocket_client::make_request(const std::string &verb, const std::s
         create_socket();
     }
 
-    auto now = utils::get_timestamp();
+    auto now = utils::get_timestamp_ms();
     std::ostringstream oss;
     rapidjson::OStreamWrapper buffer(oss);
     rapidjson::Writer<rapidjson::OStreamWrapper> w(buffer);
