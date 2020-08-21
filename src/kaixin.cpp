@@ -32,70 +32,34 @@
 kaixin_profile_t *g_profile = nullptr;
 
 
-// 初始化
-int kaixin_initialize(const char *organization, const char *application, const char *app_key,
-                      const char *app_secret, const char *base_url)
+// 加载更新令牌
+static bool load_refresh_token()
 {
-    if (g_config != nullptr)
+    auto expires_at = utils::get_reg_type_value<int64_t>("kaixin::expires_at");
+    auto binary = utils::get_reg_type_value<std::vector<uint8_t>>("kaixin::token");
+
+    if (g_config == nullptr || binary.empty() || expires_at < utils::get_timestamp())
     {
-        // 已经初始化过了
-        return EPERM;
+        return false;
     }
 
-    if (utils::is_empty(organization) || utils::is_empty(application)
-        || utils::is_empty(app_key) || utils::is_empty(app_secret))
-    {
-        // 组织名、应用名、APP KEY 或 SECRET 为空
-        return EINVAL;
-    }
-
-    if (!utils::is_empty(base_url) && strstr(base_url, "https://") != base_url)
-    {
-        // 基础 URL 必须是 HTTPS 协议
-        return EINVAL;
-    }
-
-    g_config = new kaixin::Config;
-    _ASSERT(g_config != nullptr);
-    g_config->organization = organization;
-    g_config->application = application;
-    g_config->app_key = app_key;
-    g_config->app_secret = app_secret;
-
-    if (utils::is_empty(base_url))
-    {
-        // TODO: 设置默认生产环境 URL
-    }
-    else
-    {
-        g_config->base_url = base_url;
-
-        if (g_config->base_url.at(g_config->base_url.length() - 1) == '/')
-        {
-            // 删除结尾处的“/”
-            g_config->base_url.erase(g_config->base_url.length() - 1, 1);
-        }
-    }
-
-    ix::initNetSystem();
-    return 0;
+    g_config->refresh_token = utils::unprotect_data(binary);
+    return !g_config->refresh_token.empty();
 }
 
-
-// 反初始化
-void kaixin_uninitialize()
+// 保存更新令牌
+static void save_refresh_token()
 {
-    delete g_profile;
-    g_profile = nullptr;
-
-    delete g_config;
-    g_config = nullptr;
-
-    ix::uninitNetSystem();
+    if (g_config != nullptr && !g_config->refresh_token.empty()
+        && g_config->refresh_token_expires_at > utils::get_timestamp())
+    {
+        auto binary = utils::protect_data(g_config->refresh_token);
+        utils::set_reg_value("kaixin::token", binary);
+        utils::set_reg_value("kaixin::expires_at", g_config->refresh_token_expires_at);
+    }
 }
 
-
-// 登录
+// 处理登录
 static int sign_in_handler(const rapidjson::Value &data)
 {
     using rapidjson::get;
@@ -148,11 +112,106 @@ static int sign_in_handler(const rapidjson::Value &data)
     g_profile->id_token_expires_at = g_config->id_token_expires_at;
     get(g_profile->status, doc, "status");
 
+    // 保存令牌
+    save_refresh_token();
     return 0;
 }
 
+// 更新令牌
+static int refresh_token()
+{
+    if (g_config == nullptr)
+    {
+        return EINVAL;
+    }
+
+    kaixin::string_map form{
+        { "refresh_token", g_config->refresh_token }
+    };
+
+    return kaixin::send_request(ix::HttpClient::kPatch, "/session", form, sign_in_handler);
+}
+
+
+// 初始化
+int kaixin_initialize(const char *organization, const char *application, const char *app_key,
+                      const char *app_secret, const char *base_url)
+{
+    if (g_config != nullptr)
+    {
+        // 已经初始化过了
+        return EPERM;
+    }
+
+    if (utils::is_empty(organization) || utils::is_empty(application)
+        || utils::is_empty(app_key) || utils::is_empty(app_secret))
+    {
+        // 组织名、应用名、APP KEY 或 SECRET 为空
+        return EINVAL;
+    }
+
+    if (!utils::is_empty(base_url) && strstr(base_url, "https://") != base_url)
+    {
+        // 基础 URL 必须是 HTTPS 协议
+        return EINVAL;
+    }
+
+    g_config = new kaixin::Config;
+    _ASSERT(g_config != nullptr);
+    g_config->organization = organization;
+    g_config->application = application;
+    g_config->app_key = app_key;
+    g_config->app_secret = app_secret;
+
+    if (utils::is_empty(base_url))
+    {
+        // 默认设置生产环境 URL
+        g_config->base_url = "https://api.ubesthelp.com";
+    }
+    else
+    {
+        g_config->base_url = base_url;
+
+        if (g_config->base_url.at(g_config->base_url.length() - 1) == '/')
+        {
+            // 删除结尾处的“/”
+            g_config->base_url.erase(g_config->base_url.length() - 1, 1);
+        }
+    }
+
+    ix::initNetSystem();
+
+    // 加载上次保存的更新令牌
+    if (load_refresh_token())
+    {
+        refresh_token();
+    }
+
+    return 0;
+}
+
+
+// 反初始化
+void kaixin_uninitialize()
+{
+    delete g_profile;
+    g_profile = nullptr;
+
+    delete g_config;
+    g_config = nullptr;
+
+    ix::uninitNetSystem();
+}
+
+
+// 登录
 int kaixin_sign_in(const char *username, const char *password)
 {
+    if (g_config == nullptr)
+    {
+        return EINVAL;
+    }
+
     kaixin::string_map form{
         { "username", username },
         { "password", password }
@@ -162,6 +221,7 @@ int kaixin_sign_in(const char *username, const char *password)
 }
 
 
+// 注销
 int kaixin_sign_out()
 {
     if (g_config == nullptr)

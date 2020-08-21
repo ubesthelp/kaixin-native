@@ -62,7 +62,7 @@ std::string to_hex(const uint8_t *buffer, size_t length);
  *
  * \return      UNIX 时间，毫秒。
  */
-inline constexpr int64_t timestamp()
+inline constexpr int64_t get_timestamp()
 {
     using namespace std::chrono;
     auto ms = time_point_cast<milliseconds>(system_clock::now());
@@ -166,7 +166,7 @@ std::wstring to_wide(const std::string &narrow);
 
 
 // 注册表值
-using reg_value = std::variant<std::string, std::vector<uint8_t>, uint64_t>;
+using reg_value = std::variant<std::string, std::vector<uint8_t>, uint32_t, int64_t>;
 
 
 /*!
@@ -181,35 +181,51 @@ reg_value get_reg_value(const std::string &value_name, const reg_value &default_
 
 
 /*!
- * \brief       获取注册表字符串值。
+ * \brief       获取注册表值。
  *
- * \param[in]   value_name      字符串值名称
+ * \tparam      T               值类型
+ * \param[in]   value_name      值名称
  * \param[in]   default_value   当值不存在时要返回的默认值
  *
- * \return      字符串值或默认值。
+ * \return      值或默认值。
  */
-inline std::string get_reg_string_value(const std::string &value_name,
-                                        const std::string &default_value = {})
+template<typename T>
+inline T get_reg_type_value(const std::string &value_name, const T &default_value = {})
 {
     auto value = get_reg_value(value_name, default_value);
-    return std::get<std::string>(value);
+    return std::get<T>(value);
 }
 
 
 /*!
- * \brief       获取注册表二进制值。
+ * \brief       设置注册表值。
  *
- * \param[in]   value_name      二进制值名称
- * \param[in]   default_value   当值不存在时要返回的默认值
+ * \param[in]   value_name      值名称
+ * \param[in]   value           值
  *
- * \return      二进制值或默认值。
+ * \return      如果设置成功，则返回 `true`；否则返回 `false`。
  */
-inline std::vector<uint8_t> get_reg_binary_value(const std::string &value_name,
-                                                 const std::vector<uint8_t> &default_value = {})
-{
-    auto value = get_reg_value(value_name, default_value);
-    return std::get<std::vector<uint8_t>>(value);
-}
+bool set_reg_value(const std::string &value_name, const reg_value &value);
+
+
+/*!
+ * \brief       加密字符串。
+ *
+ * \param[in]   data            要加密的字符串
+ *
+ * \return      字符串加密后的二进制数据。
+ */
+std::vector<uint8_t> protect_data(const std::string &data);
+
+
+/*!
+ * \brief       解密字符串。
+ *
+ * \param[in]   data            要解密的二进制数据
+ *
+ * \return      解密后的字符串。
+ */
+std::string unprotect_data(const std::vector<uint8_t> &data);
 #endif
 
 

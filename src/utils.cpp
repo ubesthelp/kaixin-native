@@ -15,6 +15,7 @@
 #ifdef KAIXIN_OS_WINDOWS
 #define NOMINMAX
 #include <Windows.h>
+#include <dpapi.h>
 #endif
 
 #include <openssl/evp.h>
@@ -81,8 +82,8 @@ std::string get_local_agent_code()
     }
 
 #ifdef KAIXIN_OS_WINDOWS
-    auto icode = get_reg_string_value("icode");
-    auto vcode = get_reg_binary_value("vcode");
+    auto icode = get_reg_type_value<std::string>("icode");
+    auto vcode = get_reg_type_value<std::vector<uint8_t>>("vcode");
 #endif
 
     if (icode.empty() || vcode.empty())
@@ -213,16 +214,104 @@ reg_value get_reg_value(const std::string &value_name, const reg_value &default_
         rvalue = std::move(value);
         break;
     case REG_DWORD:
-        rvalue = *reinterpret_cast<DWORD *>(value.data());
+        rvalue = *reinterpret_cast<uint32_t *>(value.data());
         break;
     case REG_QWORD:
-        rvalue = *reinterpret_cast<uint64_t *>(value.data());
+        rvalue = *reinterpret_cast<int64_t *>(value.data());
         break;
     default:
         break;
     }
 
     return rvalue;
+}
+
+
+bool set_reg_value(const std::string &value_name, const reg_value &value)
+{
+    std::wstring subkey(L"SOFTWARE\\");
+    subkey += to_wide(g_config->organization);
+    subkey += L"\\";
+    subkey += to_wide(g_config->application);
+
+    auto wide_name = to_wide(value_name);
+    DWORD dwType = 0;
+    std::wstring wide_data;
+    DWORD dwData = 0;
+    int64_t qwData = 0;
+    const void *data = nullptr;
+    DWORD cbData = 0;
+
+    switch (value.index())
+    {
+    case 0:
+        dwType = REG_SZ;
+        wide_data = to_wide(std::get<0>(value));
+        data = wide_data.c_str();
+        cbData = static_cast<DWORD>((wide_data.length() + 1) * sizeof(wchar_t));
+        break;
+    case 1:
+        dwType = REG_BINARY;
+        data = std::get<1>(value).data();
+        cbData = static_cast<DWORD>(std::get<1>(value).size());
+        break;
+    case 2:
+        dwType = REG_DWORD;
+        dwData = std::get<uint32_t>(value);
+        data = &dwData;
+        cbData = sizeof(dwData);
+        break;
+    case 3:
+        dwType = REG_QWORD;
+        qwData = std::get<int64_t>(value);
+        data = &qwData;
+        cbData = sizeof(qwData);
+        break;
+    default:
+        return false;
+    }
+
+    auto r = RegSetKeyValueW(HKEY_CURRENT_USER, subkey.c_str(), wide_name.c_str(), dwType, data,
+                             cbData);
+    return r == ERROR_SUCCESS;
+}
+
+
+std::vector<uint8_t> protect_data(const std::string &data)
+{
+    DATA_BLOB in = { 0 };
+    in.pbData = reinterpret_cast<BYTE *>(const_cast<char *>(data.c_str()));
+    in.cbData = static_cast<DWORD>(data.length());
+
+    DATA_BLOB out = { 0 };
+    std::vector<uint8_t> res;
+
+    if (CryptProtectData(&in, NULL, NULL, NULL, NULL, 0, &out))
+    {
+        res.assign(out.pbData, out.pbData + out.cbData);
+        LocalFree(out.pbData);
+    }
+
+    return res;
+}
+
+
+std::string unprotect_data(const std::vector<uint8_t> &data)
+{
+    DATA_BLOB in = { 0 };
+    in.pbData = const_cast<BYTE *>(data.data());
+    in.cbData = static_cast<DWORD>(data.size());
+
+    DATA_BLOB out = { 0 };
+    std::string res;
+
+    if (CryptUnprotectData(&in, NULL, NULL, NULL, NULL, 0, &out))
+    {
+        res.assign(reinterpret_cast<char *>(out.pbData), out.cbData);
+        LocalFree(out.pbData);
+    }
+
+    return res;
 }
 #endif
 // vaCI:skip-*:nullptr

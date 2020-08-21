@@ -155,6 +155,7 @@ KAIXIN_EXPORT int kaixin_sign_in(const char *username, const char *password);
 KAIXIN_EXPORT int kaixin_sign_out();
 
 
+
 /*!
  * \brief       获取用户配置。
  *
