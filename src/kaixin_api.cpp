@@ -132,7 +132,7 @@ int send_request(const std::string &verb, const std::string &path, const string_
     args->logger = [](const std::string &msg) { logger::debug(msg.c_str()); };
 
 #ifndef NDEBUG
-    args->verbose = true;
+    args->verbose = (utils::get_reg_type_value<uint32_t>("kaixin::verbose") != 0);
 #endif
 
     if (!g_config->id_token.empty() && g_config->id_token_expires_at >= now)
@@ -149,13 +149,16 @@ int send_request(const std::string &verb, const std::string &path, const string_
     auto resp = http.request(url, verb, body, args);
 
 #ifndef NDEBUG
-    for (const auto &[key, value] : resp->headers)
+    if (args->verbose)
     {
-        LD() << key + ":" << value;
-    }
+        for (const auto &[key, value] : resp->headers)
+        {
+            LD() << key + ":" << value;
+        }
 
-    LD() << " ";
-    LD() << resp->payload;
+        LD() << " ";
+        LD() << resp->payload;
+    }
 #endif
 
     if (resp->payload.empty())
