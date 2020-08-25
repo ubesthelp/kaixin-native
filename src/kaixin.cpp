@@ -31,6 +31,13 @@
 #define EINVAL 22
 #endif
 
+#ifdef KAIXIN_COMP_MSVC
+#ifdef strdup
+#undef strdup
+#endif
+#define strdup(s) _strdup(s)
+#endif
+
 
 kaixin_profile_t *g_profile = nullptr;
 
@@ -100,7 +107,7 @@ static int sign_in_handler(const rapidjson::Value &data)
     {
         g_config->agent_code = utils::get_local_agent_code();
     }
-    else if (g_config->agent_code != utils::get_current_locale())
+    else if (g_config->agent_code != utils::get_local_agent_code())
     {
         // 如果代理编号变了，则清空素材。
         g_config->materials.clear();
@@ -316,7 +323,7 @@ const char *kaixin_get_device_id()
 
 
 // 获取授权
-kaixin_auth_t *kaixin_get_auth()
+const kaixin_auth_t *kaixin_get_auth()
 {
     kaixin_auth_t *auth = nullptr;
 
@@ -331,11 +338,7 @@ kaixin_auth_t *kaixin_get_auth()
         {
             auto *p = new kaixin_auth_t;
             p->next = nullptr;
-#ifdef KAIXIN_COMP_MSVC
-            p->module_name = _strdup(get<const char *>(a, "module"));
-#else
             p->module_name = strdup(get<const char *>(a, "module"));
-#endif
             get(p->edition, a, "edition");
             get(p->count, a, "count");
             get(p->time, a, "time");
@@ -360,16 +363,16 @@ kaixin_auth_t *kaixin_get_auth()
 
 
 // 释放授权链表
-void kaixin_free_auth(kaixin_auth_t *auth)
+void kaixin_free_auth(const kaixin_auth_t *auth)
 {
-    auto *p = auth;
+    auto *p = const_cast<kaixin_auth_t *>(auth);
 
     while (p != nullptr)
     {
-        auth = p->next;
+        auto next = p->next;
         free(const_cast<char *>(p->module_name));
         delete p;
-        p = auth;
+        p = next;
     }
 }
 
@@ -478,7 +481,7 @@ static void to_shopee_hosts(const rapidjson::Value &data, kaixin_shopee_hosts_by
     to_shopee_hosts(data["cdn"], &hosts->cdn);
 }
 
-const kaixin_shopee_hosts_t * kaixin_get_shopee_hosts()
+const kaixin_shopee_hosts_t *kaixin_get_shopee_hosts()
 {
     if (g_config == nullptr)
     {
@@ -504,4 +507,57 @@ const kaixin_shopee_hosts_t * kaixin_get_shopee_hosts()
     }
 
     return &g_config->shopee_hosts;
+}
+
+
+// 获取页面地址
+const char *kaixin_get_web_url(kaixin_web_page_t page)
+{
+    if (g_config == nullptr)
+    {
+        return nullptr;
+    }
+
+    kaixin::string_map queries{
+       { "locale", utils::get_current_locale() },
+    };
+
+    switch (page)
+    {
+    case KAIXIN_WEB_PAGE_SIGN_IN:
+        queries.emplace("page", "sign-in");
+        break;
+    case KAIXIN_WEB_PAGE_RESET_PASSWORD:
+        queries.emplace("page", "reset-password");
+        break;
+    case KAIXIN_WEB_PAGE_CHANGE_PASSWORD:
+        queries.emplace("page", "change-password");
+        break;
+    case KAIXIN_WEB_PAGE_BUY:
+        queries.emplace("page", "buy");
+        break;
+    case KAIXIN_WEB_PAGE_ACTIVATE:
+        queries.emplace("page", "activate");
+        break;
+    default:
+        LE() << "Unknown page:" << page;
+        return nullptr;
+    }
+
+    char *url = nullptr;
+
+    kaixin::send_request(ix::HttpClient::kGet, "/web-url", queries, {}, [&url](const rapidjson::Value &data)
+    {
+        using rapidjson::get;
+        url = strdup(data.GetString());
+        return 0;
+    });
+
+    return url;
+}
+
+
+void kaixin_free_string(const char *s)
+{
+    free(const_cast<char *>(s));
 }

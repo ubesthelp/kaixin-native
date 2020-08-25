@@ -71,6 +71,17 @@ typedef enum kaixin_log_severity_e
 } kaixin_log_severity_t;
 
 
+/// \brief      功能页面。
+typedef enum kaixin_web_page_e
+{
+    KAIXIN_WEB_PAGE_SIGN_IN,                    ///< 登录页
+    KAIXIN_WEB_PAGE_RESET_PASSWORD,             ///< 重置密码页
+    KAIXIN_WEB_PAGE_CHANGE_PASSWORD,            ///< 修改密码页
+    KAIXIN_WEB_PAGE_BUY,                        ///< 购买页
+    KAIXIN_WEB_PAGE_ACTIVATE,                   ///< 激活页
+} kaixin_web_page_t;
+
+
 /// \brief      用户配置，登录成功后获取。
 typedef struct kaixin_profile_s
 {
@@ -238,7 +249,7 @@ KAIXIN_EXPORT const char *kaixin_get_device_id();
  *
  * \return      应用授权；如果没有授权，则返回 `NULL`。返回的指针需要调用 `kaixin_free_auth` 函数释放。
  */
-KAIXIN_EXPORT kaixin_auth_t *kaixin_get_auth();
+KAIXIN_EXPORT const kaixin_auth_t *kaixin_get_auth();
 
 
 /*!
@@ -246,7 +257,7 @@ KAIXIN_EXPORT kaixin_auth_t *kaixin_get_auth();
  *
  * \param[in]   auth        要释放的链表。
  */
-KAIXIN_EXPORT void kaixin_free_auth(kaixin_auth_t *auth);
+KAIXIN_EXPORT void kaixin_free_auth(const kaixin_auth_t *auth);
 
 
 /*!
@@ -298,7 +309,25 @@ KAIXIN_EXPORT int kaixin_set_notification_callback(kaixin_notification_callback_
  *
  * \return      Shopee 域名。
  */
-KAIXIN_EXPORT const kaixin_shopee_hosts_t * kaixin_get_shopee_hosts();
+KAIXIN_EXPORT const kaixin_shopee_hosts_t *kaixin_get_shopee_hosts();
+
+
+/*!
+ * \brief       获取功能页面地址。
+ *
+ * \param[in]   page        要获取地址的页面。
+ *
+ * \return      页面地址，不再使用时须调用 `kaixin_free_string` 释放。
+ */
+KAIXIN_EXPORT const char *kaixin_get_web_url(kaixin_web_page_t page);
+
+
+/*!
+ * \brief       释放字符串。
+ *
+ * \param[in]   s           要释放的字符串。
+ */
+KAIXIN_EXPORT void kaixin_free_string(const char *s);
 
 
 #ifdef __cplusplus

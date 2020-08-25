@@ -114,6 +114,10 @@ int main()
         std::cout << "Shopee Taiwan: " << kaixin_get_shopee_hosts()->china.buyer.tw << std::endl;
 
 
+        std::cout << "Getting change password URL." << std::endl;
+        std::cout << kaixin_get_web_url(KAIXIN_WEB_PAGE_CHANGE_PASSWORD) << std::endl;
+
+
         // 设备授权应用在获取应用 ID 后设置通知回调
         kaixin_set_notification_callback(kaixin_notification_callback, nullptr);
         std::this_thread::sleep_for(5s);
