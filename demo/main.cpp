@@ -114,13 +114,10 @@ int main()
         std::cout << "Shopee Taiwan: " << kaixin_get_shopee_hosts()->china.buyer.tw << std::endl;
 
 
-        std::cout << "Getting change password URL." << std::endl;
-        std::cout << kaixin_get_web_url(KAIXIN_WEB_PAGE_CHANGE_PASSWORD) << std::endl;
-
-
-        // 设备授权应用在获取应用 ID 后设置通知回调
-        kaixin_set_notification_callback(kaixin_notification_callback, nullptr);
-        std::this_thread::sleep_for(5s);
+        std::cout << "Getting buy URL." << std::endl;
+        auto *url = kaixin_get_web_url(KAIXIN_WEB_PAGE_BUY);
+        std::cout << url << std::endl;
+        kaixin_free_string(url);
 
 
         std::cout << "Getting auth." << std::endl;
@@ -240,6 +237,12 @@ int main()
 #endif
 
 
+        // 设备授权应用在获取应用 ID 后设置通知回调
+        kaixin_set_notification_callback(kaixin_notification_callback, nullptr);
+        std::cout << "Enter anything to quit." << std::endl;
+        std::cin >> username;
+
+
         //std::cout << "Signing out." << std::endl;
         //r = kaixin_sign_out();
 
@@ -247,10 +250,10 @@ int main()
         //{
         //    std::cerr << "Failed to sign out:" << r << std::endl;
         //}
-        } while (false);
+    } while (false);
 
-        std::cout << "Uninitializing." << std::endl;
-        kaixin_uninitialize();
+    std::cout << "Uninitializing." << std::endl;
+    kaixin_uninitialize();
 
-        return 0;
-    }
+    return 0;
+}
