@@ -13,6 +13,8 @@
 #include "kaixin.h"
 
 #include <ixwebsocket/IXNetSystem.h>
+#include <rapidjson/ostreamwrapper.h>
+#include <rapidjson/writer.h>
 
 #include "authorization_disabler.h"
 #include "fingerprint.h"
@@ -195,6 +197,7 @@ int kaixin_initialize(const char *organization, const char *application, const c
     LD() << "Initializing kaixin native SDK " KAIXIN_VERSION_STRING ".";
     g_config = new kaixin::Config;
     _ASSERT(g_config != nullptr);
+    memset(&g_config->shopee_hosts, 0, sizeof(g_config->shopee_hosts));
     g_config->organization = organization;
     g_config->application = application;
     g_config->app_key = app_key;
@@ -440,6 +443,7 @@ const char *kaixin_get_material(const char *type)
 }
 
 
+// 下行通知
 int kaixin_set_notification_callback(kaixin_notification_callback_t func, void *user_data)
 {
     if (g_config == nullptr || g_config->notify)
@@ -449,4 +453,55 @@ int kaixin_set_notification_callback(kaixin_notification_callback_t func, void *
 
     g_config->notify = std::make_unique<websocket_client>(func, user_data);
     return 0;
+}
+
+
+// Shopee 域名
+static void to_shopee_hosts(const rapidjson::Value &data, kaixin_shopee_hosts_by_website_t *hosts)
+{
+    using rapidjson::get;
+    hosts->tw = get(data, "tw");
+    hosts->sg = get(data, "sg");
+    hosts->id = get(data, "id");
+    hosts->th = get(data, "th");
+    hosts->my = get(data, "my");
+    hosts->vn = get(data, "vn");
+    hosts->ph = get(data, "ph");
+    hosts->br = get(data, "br");
+}
+
+static void to_shopee_hosts(const rapidjson::Value &data, kaixin_shopee_hosts_by_sub_domain_t *hosts)
+{
+    using rapidjson::get;
+    to_shopee_hosts(data["buyer"], &hosts->buyer);
+    to_shopee_hosts(data["seller"], &hosts->seller);
+    to_shopee_hosts(data["cdn"], &hosts->cdn);
+}
+
+const kaixin_shopee_hosts_t * kaixin_get_shopee_hosts()
+{
+    if (g_config == nullptr)
+    {
+        return nullptr;
+    }
+
+    if (g_config->shopee_hosts.global.buyer.tw == nullptr)
+    {
+        kaixin::send_request(ix::HttpClient::kGet, "/shopee-hosts", [](const rapidjson::Value &data)
+        {
+            std::ostringstream oss;
+            rapidjson::OStreamWrapper buffer(oss);
+            rapidjson::Writer<rapidjson::OStreamWrapper> writer(buffer);
+            data.Accept(writer);
+            g_config->shopee_hosts_json = oss.str();
+
+            rapidjson::Document doc;
+            doc.ParseInsitu(g_config->shopee_hosts_json.data());
+            to_shopee_hosts(doc["global"], &g_config->shopee_hosts.global);
+            to_shopee_hosts(doc["china"], &g_config->shopee_hosts.china);
+            return 0;
+        });
+    }
+
+    return &g_config->shopee_hosts;
 }

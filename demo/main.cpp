@@ -47,7 +47,7 @@ static inline bool has_error(int r, const char *action)
 
 static void log_output(const char *msg, kaixin_log_severity_t)
 {
-    std::clog << "[kaixin] " << msg << std::endl;
+    std::cout << "[kaixin] " << msg << std::endl;
 }
 
 
@@ -108,6 +108,10 @@ int main()
 
         std::cout << "Getting device ID." << std::endl;
         std::cout << "Device ID: " << kaixin_get_device_id() << std::endl;
+
+
+        std::cout << "Getting Shopee hosts." << std::endl;
+        std::cout << "Shopee Taiwan: " << kaixin_get_shopee_hosts()->china.buyer.tw << std::endl;
 
 
         // 设备授权应用在获取应用 ID 后设置通知回调
@@ -239,10 +243,10 @@ int main()
         //{
         //    std::cerr << "Failed to sign out:" << r << std::endl;
         //}
-    } while (false);
+        } while (false);
 
-    std::cout << "Uninitializing." << std::endl;
-    kaixin_uninitialize();
+        std::cout << "Uninitializing." << std::endl;
+        kaixin_uninitialize();
 
-    return 0;
-}
+        return 0;
+    }

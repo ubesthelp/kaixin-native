@@ -120,6 +120,37 @@ typedef struct kaixin_notification_arguments_s
 } kaixin_notification_arguments_t;
 
 
+/// \brief      Shopee 各站点域名。
+typedef struct kaixin_shopee_hosts_by_website_s
+{
+    const char *tw;                             ///< 台湾站
+    const char *sg;                             ///< 新加坡站
+    const char *id;                             ///< 印尼站
+    const char *th;                             ///< 泰国站
+    const char *my;                             ///< 马来西亚站
+    const char *vn;                             ///< 越南站
+    const char *ph;                             ///< 菲律宾站
+    const char *br;                             ///< 巴西站
+} kaixin_shopee_hosts_by_website_t;
+
+
+/// \brief      Shopee 子域名。
+typedef struct kaixin_shopee_hosts_by_sub_domain_s
+{
+    kaixin_shopee_hosts_by_website_t buyer;     ///< 买家子域名
+    kaixin_shopee_hosts_by_website_t seller;    ///< 卖家子域名
+    kaixin_shopee_hosts_by_website_t cdn;       ///< CDN 子域名
+} kaixin_shopee_hosts_by_sub_domain_t;
+
+
+/// \brief      Shopee 域名。
+typedef struct kaixin_shopee_hosts_s
+{
+    kaixin_shopee_hosts_by_sub_domain_t global; ///< 全球通用域名
+    kaixin_shopee_hosts_by_sub_domain_t china;  ///< 中国大陆用域名
+} kaixin_shopee_hosts_t;
+
+
 /// 下行通知回调函数
 typedef void(*kaixin_notification_callback_t)(const kaixin_notification_arguments_t *args, void *user_data);
 
@@ -260,6 +291,14 @@ KAIXIN_EXPORT const char *kaixin_get_material(const char *type);
  */
 KAIXIN_EXPORT int kaixin_set_notification_callback(kaixin_notification_callback_t func,
                                                    void *user_data);
+
+
+/*!
+ * \brief       获取 Shopee 域名。
+ *
+ * \return      Shopee 域名。
+ */
+KAIXIN_EXPORT const kaixin_shopee_hosts_t * kaixin_get_shopee_hosts();
 
 
 #ifdef __cplusplus
