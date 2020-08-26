@@ -20,6 +20,7 @@
 
 #include "kaixin_api.h"
 #include "kaixin_version.h"
+#include "logger.h"
 #include "rapidjsonhelpers.h"
 #include "simple_timer.h"
 #include "utils.h"
@@ -81,10 +82,12 @@ websocket_client::websocket_client(kaixin_notification_callback_t callback, void
 websocket_client::~websocket_client()
 {
     delete heartbeat_timer_;
+    heartbeat_timer_ = nullptr;
 
     if (registered_)
     {
         // 注销下行通知
+        LD() << "Deregistering notifications.";
         dereg_seq_ = del("/notification", {}, {}, { {"x-ca-websocket_api_type", "UNREGISTER"} });
 
         using namespace std::chrono_literals;
@@ -116,6 +119,8 @@ void websocket_client::on_message_callback(const ix::WebSocketMessagePtr &msg)
     {
     case ix::WebSocketMessageType::Open:
         {
+            LD() << "Socket connected.";
+
             // 命令字：RG
             // 含义：在API网关注册长连接，携带DeviceId
             // 命令类型：请求
@@ -126,12 +131,20 @@ void websocket_client::on_message_callback(const ix::WebSocketMessagePtr &msg)
             rg += utils::generate_random_hex_string(16);
             rg += "@";
             rg += g_config->app_key;
+            LD() << rg;
             ws_->sendText(rg);
         }
         break;
 
     case ix::WebSocketMessageType::Close:
-        //ws_->start();
+        LD() << "Socket disconnected.";
+
+        if (heartbeat_timer_ != nullptr)
+        {
+            delete heartbeat_timer_;
+            heartbeat_timer_ = nullptr;
+        }
+
         break;
 
     case ix::WebSocketMessageType::Message:
@@ -149,12 +162,17 @@ void websocket_client::on_message_callback(const ix::WebSocketMessagePtr &msg)
             }
         }
         break;
+
+    case ix::WebSocketMessageType::Error:
+        LE() << "Socket error:" << msg->errorInfo.http_status << msg->errorInfo.reason;
+        break;
     }
 }
 
 
 void websocket_client::on_register_device_succeeded(const std::string_view &arg)
 {
+    LD() << "Device registered.";
     // 命令字：RO
     // 含义：DeviceId注册成功时，API网关返回成功，并将连接唯一标识和心跳间隔配置返回
     // 命令类型：应答
@@ -171,6 +189,7 @@ void websocket_client::on_register_device_succeeded(const std::string_view &arg)
     heartbeat_timer_->start(interval);
 
     // 注册下行通知
+    LD() << "Registering notifications.";
     reg_seq_ = post("/notification", {}, {}, { { "x-ca-websocket_api_type", "REGISTER" } });
 }
 
@@ -183,6 +202,7 @@ void websocket_client::on_register_device_failed(const std::string_view &/*arg*/
     // 发送端：API网关
     // 格式：RF#ErrorMessage
     // 示例：RF#ServerError
+    LE() << "Device registration failed.";
 }
 
 
@@ -194,6 +214,8 @@ void websocket_client::on_heartbeat_response(const std::string_view &/*arg*/)
 
 void websocket_client::on_notify(const std::string_view &arg)
 {
+    LD() << "Notified.";
+
     // 命令字：NO
     // 含义：客户端返回接收下行通知应答
     // 命令类型：应答
@@ -221,6 +243,7 @@ void websocket_client::on_notify(const std::string_view &arg)
 
 void websocket_client::on_flow_control(const std::string_view &/*arg*/)
 {
+    LD() << "Flow control.";
     // 命令字：OS
     // 含义：客户端请求量达到API网关流控阈值，API网关会给客户端发送这个命令，需要客户端主动断掉连接，主动重连。主动重连将不会影响用户体验。否则API网关不久后会主动断链长连接。
     // 命令类型：请求
@@ -233,6 +256,7 @@ void websocket_client::on_flow_control(const std::string_view &/*arg*/)
 
 void websocket_client::on_life_cycle(const std::string_view &/*arg*/)
 {
+    LD() << "Life cycle.";
     // 命令字：CR
     // 含义：连接达到长连接生命周期，API网关会给客户端发送这个命令，需要客户端主动断掉连接，主动重连。主动重连将不会影响用户体验。否则API网关不久后会主动断链长连接。
     // 命令类型：请求
@@ -359,12 +383,14 @@ void websocket_client::handle_response(const std::string &json)
     {
         if ((status / 100) == 2)
         {
+            LD() << "Notification registered.";
             reg_seq_ = -1;
             registered_ = true;
         }
     }
     else if (seq == dereg_seq_)
     {
+        LD() << "Notification deregistered.";
         registered_ = false;
         cond_.notify_all();
     }

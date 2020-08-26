@@ -228,12 +228,12 @@ int main()
         //}
 
 
-        //std::cout << "Get payment URL." << std::endl;
-        //std::cout << "Order number: ";
-        //std::cin >> username;
-        //std::cout << "Channel: ";
-        //std::cin >> password;
-        //std::cout << kaixin::itnl::get_payment_url(username, password) << std::endl;
+        std::cout << "Get payment URL." << std::endl;
+        std::cout << "Order number: ";
+        std::cin >> username;
+        std::cout << "Channel: ";
+        std::cin >> password;
+        std::cout << kaixin::itnl::get_payment_url(username, password) << std::endl;
 #endif
 
 
