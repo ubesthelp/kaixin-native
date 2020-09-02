@@ -115,7 +115,7 @@ int main()
 
 
         std::cout << "Getting buy URL." << std::endl;
-        auto *url = kaixin_get_web_url(KAIXIN_WEB_PAGE_BUY);
+        auto *url = kaixin_get_web_url(KAIXIN_WEB_PAGE_ACTIVATE);
         std::cout << url << std::endl;
         kaixin_free_string(url);
 
@@ -136,7 +136,7 @@ int main()
                 std::cout << p->module_name << ":" << std::endl;
                 std::cout << "  edition: " << p->edition << std::endl;
                 std::cout << "  count  : " << p->count << std::endl;
-                std::cout << "  time   : " << p->time << std::endl;
+                std::cout << "  time   : " << ctime(&p->time) << std::endl;
                 p = p->next;
             }
 
