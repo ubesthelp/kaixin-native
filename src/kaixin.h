@@ -74,11 +74,12 @@ typedef enum kaixin_log_severity_e
 /// \brief      功能页面。
 typedef enum kaixin_web_page_e
 {
-    KAIXIN_WEB_PAGE_SIGN_IN,                    ///< 登录页
+    KAIXIN_WEB_PAGE_SIGN_UP,                    ///< 注册页
     KAIXIN_WEB_PAGE_RESET_PASSWORD,             ///< 重置密码页
     KAIXIN_WEB_PAGE_CHANGE_PASSWORD,            ///< 修改密码页
     KAIXIN_WEB_PAGE_BUY,                        ///< 购买页
     KAIXIN_WEB_PAGE_ACTIVATE,                   ///< 激活页
+    KAIXIN_WEB_PAGE_BUY_OR_ACTIVATE,            ///< 购买或激活页
 } kaixin_web_page_t;
 
 
