@@ -1,0 +1,22 @@
+﻿/*! ***********************************************************************************************
+ *
+ * \file        kaixin_version.h
+ * \brief       开心 C SDK 版本号头文件。
+ *
+ * \version     @PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@
+ * \date        2020-7-28
+ *
+ * \author      Roy QIU <karoyqiu@gmail.com>
+ * \copyright   © 2020 开心网络。
+ *
+ **************************************************************************************************/
+#pragma once
+#define KAIXIN_VERSION_MAJOR        @PROJECT_VERSION_MAJOR@
+#define KAIXIN_VERSION_MINOR        @PROJECT_VERSION_MINOR@
+#define KAIXIN_VERSION_PATCH        @PROJECT_VERSION_PATCH@
+#define KAIXIN_VERSION_REVISION     @PROJECT_VERSION_TWEAK@
+
+#define _KAIXIN_S(x)    __KAIXIN_S(x)
+#define __KAIXIN_S(x)   #x
+#define _KAIXIN_VERSION_STRING(maj, min, pat, rev)      _KAIXIN_S(maj) "." _KAIXIN_S(min) "." _KAIXIN_S(pat) "." _KAIXIN_S(rev)
+#define KAIXIN_VERSION_STRING       _KAIXIN_VERSION_STRING(KAIXIN_VERSION_MAJOR, KAIXIN_VERSION_MINOR, KAIXIN_VERSION_PATCH, KAIXIN_VERSION_REVISION)
