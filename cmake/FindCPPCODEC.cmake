@@ -11,7 +11,7 @@ mark_as_advanced(
 
 if(CPPCODEC_FOUND AND NOT TARGET CPPCODEC)
     add_library(CPPCODEC INTERFACE IMPORTED)
-    set_target_properties(IXWebSocket PROPERTIES
+    set_target_properties(CPPCODEC PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES "${CPPCODEC_INCLUDE_DIR}"
     )
 endif()

@@ -524,8 +524,8 @@ const char *kaixin_get_web_url(kaixin_web_page_t page)
 
     switch (page)
     {
-    case KAIXIN_WEB_PAGE_SIGN_IN:
-        queries.emplace("page", "sign-in");
+    case KAIXIN_WEB_PAGE_SIGN_UP:
+        queries.emplace("page", "sign-up");
         break;
     case KAIXIN_WEB_PAGE_RESET_PASSWORD:
         queries.emplace("page", "reset-password");
@@ -538,6 +538,9 @@ const char *kaixin_get_web_url(kaixin_web_page_t page)
         break;
     case KAIXIN_WEB_PAGE_ACTIVATE:
         queries.emplace("page", "activate");
+        break;
+    case KAIXIN_WEB_PAGE_BUY_OR_ACTIVATE:
+        queries.emplace("page", "buy-or-activate");
         break;
     default:
         LE() << "Unknown page:" << page;

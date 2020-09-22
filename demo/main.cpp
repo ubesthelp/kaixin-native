@@ -111,7 +111,7 @@ int main()
 
 
         std::cout << "Getting buy URL." << std::endl;
-        auto *url = kaixin_get_web_url(KAIXIN_WEB_PAGE_ACTIVATE);
+        auto *url = kaixin_get_web_url(KAIXIN_WEB_PAGE_BUY_OR_ACTIVATE);
         std::cout << url << std::endl;
         kaixin_free_string(url);
 

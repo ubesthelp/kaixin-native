@@ -182,7 +182,7 @@ int send_request(const std::string &verb, const std::string &path, const string_
     // 服务端错误代码
     auto code = get<int>(doc, "code");
 
-    if ((resp->statusCode / 100) != 2 || code != 0)
+    if ((resp->statusCode / 100) != 2 || code != 0 || !doc.HasMember("data"))
     {
         // 服务端返回错误
         return utils::make_int(resp->statusCode, code);
