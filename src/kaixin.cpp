@@ -421,6 +421,15 @@ const char *kaixin_get_material(const char *type)
         { "locale", utils::get_current_locale() },
     };
 
+    if (g_profile != nullptr)
+    {
+        queries.emplace("agent_code", g_profile->invitation_code);
+    }
+    else
+    {
+        queries.emplace("agent_code", utils::get_local_agent_code());
+    }
+
     kaixin::send_request(ix::HttpClient::kGet, "/materials", queries, {}, [](const rapidjson::Value &data)
     {
         using rapidjson::get;
