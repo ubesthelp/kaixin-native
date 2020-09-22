@@ -40,6 +40,8 @@
 #define KAIXIN_MATERIAL_DOWNLOAD                    "download"
 // 素材类型 - 导入模板链接
 #define KAIXIN_MATERIAL_IMPORT_TEMPLATES            "import-templates"
+// 素材类型 - 访问官网
+#define KAIXIN_MATERIAL_HOMEPAGE                    "homepage"
 
 // 下行通知动作 - 更新授权
 #define KAIXIN_ACTION_REFRESH_AUTH                  "refresh-auth"
@@ -289,6 +291,7 @@ KAIXIN_EXPORT kaixin_version_t kaixin_get_lowest_version();
  * \sa          `KAIXIN_MATERIAL_CONTACTUS`
  * \sa          `KAIXIN_MATERIAL_DOWNLOAD`
  * \sa          `KAIXIN_MATERIAL_IMPORT_TEMPLATES`
+ * \sa          `KAIXIN_MATERIAL_HOMEPAGE`
  */
 KAIXIN_EXPORT const char *kaixin_get_material(const char *type);
 
