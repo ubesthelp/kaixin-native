@@ -229,14 +229,17 @@ void websocket_client::on_notify(const std::string_view &arg)
     // 发送端：API网关
     // 格式为NF#MESSAGE
     // 示例：NF#HELLO WORLD!
-    rapidjson::Document doc;
-    doc.ParseInsitu(const_cast<char *>(arg.data()));
-
-    if (!doc.HasParseError() && doc.IsObject())
+    if (arg.length() > 1)
     {
-        kaixin_notification_arguments_t args;
-        rapidjson::get(args.action, doc, "action");
-        callback_(&args, user_data_);
+        rapidjson::Document doc;
+        doc.ParseInsitu(const_cast<char *>(arg.data() + 1));
+
+        if (!doc.HasParseError() && doc.IsObject())
+        {
+            kaixin_notification_arguments_t args;
+            rapidjson::get(args.action, doc, "action");
+            callback_(&args, user_data_);
+        }
     }
 }
 
