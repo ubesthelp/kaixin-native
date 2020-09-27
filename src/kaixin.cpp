@@ -531,6 +531,15 @@ const char *kaixin_get_web_url(kaixin_web_page_t page)
        { "locale", utils::get_current_locale() },
     };
 
+    if (g_profile != nullptr)
+    {
+        queries.emplace("agent_code", g_profile->invitation_code);
+    }
+    else
+    {
+        queries.emplace("agent_code", utils::get_local_agent_code());
+    }
+
     switch (page)
     {
     case KAIXIN_WEB_PAGE_SIGN_UP:
