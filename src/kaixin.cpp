@@ -103,13 +103,9 @@ static int sign_in_handler(const rapidjson::Value &data)
     get(g_config->secret, doc, "secret");
     get(g_config->id_token_expires_at, doc, "exp");
 
-    if (g_config->agent_code.empty())
+    // 如果代理编号变了，则清空素材。
+    if (g_config->agent_code != utils::get_local_agent_code())
     {
-        g_config->agent_code = utils::get_local_agent_code();
-    }
-    else if (g_config->agent_code != utils::get_local_agent_code())
-    {
-        // 如果代理编号变了，则清空素材。
         g_config->materials.clear();
     }
 
