@@ -63,6 +63,9 @@ int main()
         }
 
 
+        std::cout << kaixin_get_web_url(KAIXIN_WEB_PAGE_SIGN_UP) << std::endl;
+
+
         std::cout << "Getting materials." << std::endl;
         std::cout << "Bottem-left ad: " << kaixin_get_material(KAIXIN_MATERIAL_AD_BOTTOMLEFT_IMAGE_LARGE) << std::endl;
 

@@ -88,7 +88,7 @@ std::string get_local_agent_code()
 
     if (icode.empty() || vcode.empty())
     {
-        return icode;
+        return {};
     }
 
     BIO *bio = nullptr;

@@ -103,13 +103,9 @@ static int sign_in_handler(const rapidjson::Value &data)
     get(g_config->secret, doc, "secret");
     get(g_config->id_token_expires_at, doc, "exp");
 
-    if (g_config->agent_code.empty())
+    // 如果代理编号变了，则清空素材。
+    if (g_config->agent_code != utils::get_local_agent_code())
     {
-        g_config->agent_code = utils::get_local_agent_code();
-    }
-    else if (g_config->agent_code != utils::get_local_agent_code())
-    {
-        // 如果代理编号变了，则清空素材。
         g_config->materials.clear();
     }
 
@@ -421,6 +417,15 @@ const char *kaixin_get_material(const char *type)
         { "locale", utils::get_current_locale() },
     };
 
+    if (g_profile != nullptr)
+    {
+        queries.emplace("agent_code", g_profile->invitation_code);
+    }
+    else
+    {
+        queries.emplace("agent_code", utils::get_local_agent_code());
+    }
+
     kaixin::send_request(ix::HttpClient::kGet, "/materials", queries, {}, [](const rapidjson::Value &data)
     {
         using rapidjson::get;
@@ -521,6 +526,15 @@ const char *kaixin_get_web_url(kaixin_web_page_t page)
     kaixin::string_map queries{
        { "locale", utils::get_current_locale() },
     };
+
+    if (g_profile != nullptr)
+    {
+        queries.emplace("agent_code", g_profile->invitation_code);
+    }
+    else
+    {
+        queries.emplace("agent_code", utils::get_local_agent_code());
+    }
 
     switch (page)
     {
