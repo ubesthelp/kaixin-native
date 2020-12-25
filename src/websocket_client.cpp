@@ -59,6 +59,7 @@ static inline void write_array(W &w, const K &key, const V &value)
 websocket_client::websocket_client(kaixin_notification_callback_t callback, void *user_data)
     : ws_(nullptr)
     , heartbeat_timer_(nullptr)
+    , restart_timer_(nullptr)
     , callback_(callback)
     , user_data_(user_data)
     , seq_(0)
@@ -82,7 +83,7 @@ websocket_client::websocket_client(kaixin_notification_callback_t callback, void
 websocket_client::~websocket_client()
 {
     delete heartbeat_timer_;
-    heartbeat_timer_ = nullptr;
+    delete restart_timer_;
 
     if (registered_)
     {
@@ -120,6 +121,8 @@ void websocket_client::on_message_callback(const ix::WebSocketMessagePtr &msg)
     case ix::WebSocketMessageType::Open:
         {
             LD() << "Socket connected.";
+            delete restart_timer_;
+            restart_timer_ = nullptr;
 
             // 命令字：RG
             // 含义：在API网关注册长连接，携带DeviceId
@@ -138,13 +141,8 @@ void websocket_client::on_message_callback(const ix::WebSocketMessagePtr &msg)
 
     case ix::WebSocketMessageType::Close:
         LD() << "Socket disconnected.";
-
-        if (heartbeat_timer_ != nullptr)
-        {
-            delete heartbeat_timer_;
-            heartbeat_timer_ = nullptr;
-        }
-
+        delete heartbeat_timer_;
+        heartbeat_timer_ = nullptr;
         break;
 
     case ix::WebSocketMessageType::Message:
@@ -252,8 +250,7 @@ void websocket_client::on_flow_control(const std::string_view &/*arg*/)
     // 命令类型：请求
     // 发送端：API网关
     // 没有其他参数，直接发送命令字
-    ws_->stop();
-    ws_->start();
+    restart_later();
 }
 
 
@@ -265,8 +262,7 @@ void websocket_client::on_life_cycle(const std::string_view &/*arg*/)
     // 命令类型：请求
     // 发送端：API网关
     // 没有其他参数，直接发送命令字
-    ws_->stop();
-    ws_->start();
+    restart_later();
 }
 
 
@@ -386,15 +382,34 @@ void websocket_client::handle_response(const std::string &json)
     {
         if ((status / 100) == 2)
         {
-            LD() << "Notification registered.";
+            LI() << "Notification registered.";
             reg_seq_ = -1;
             registered_ = true;
         }
     }
     else if (seq == dereg_seq_)
     {
-        LD() << "Notification deregistered.";
+        LI() << "Notification deregistered.";
         registered_ = false;
         cond_.notify_all();
+    }
+}
+
+
+void websocket_client::restart()
+{
+    ws_->stop();
+    ws_->start();
+}
+
+
+void websocket_client::restart_later()
+{
+    if (restart_timer_ == nullptr)
+    {
+        restart_timer_ = new simple_timer;
+        restart_timer_->set_timeout_callback(std::bind(&websocket_client::restart, this));
+        restart_timer_->set_single_shot(true);
+        restart_timer_->start(20);
     }
 }
