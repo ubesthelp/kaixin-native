@@ -123,6 +123,8 @@ static int sign_in_handler(const rapidjson::Value &data)
     g_profile->refresh_token_expires_at = g_config->refresh_token_expires_at;
     g_profile->id_token_expires_at = g_config->id_token_expires_at;
     get(g_profile->status, doc, "status");
+    LI() << "Signed in" << g_config->email;
+    LI() << "I-code:" << g_config->agent_code;
 
     // 保存令牌
     save_refresh_token();
@@ -148,6 +150,7 @@ static void refresh_token()
         return;
     }
 
+    LI() << "Refreshing tokens.";
     kaixin::string_map form{
         { "refresh_token", g_config->refresh_token }
     };
@@ -197,7 +200,7 @@ int kaixin_initialize(const char *organization, const char *application, const c
         return EINVAL;
     }
 
-    LD() << "Initializing kaixin native SDK " KAIXIN_VERSION_STRING ".";
+    LI() << "Initializing kaixin native SDK " KAIXIN_VERSION_STRING ".";
     g_config = new kaixin::Config;
     _ASSERT(g_config != nullptr);
     memset(&g_config->shopee_hosts, 0, sizeof(g_config->shopee_hosts));
@@ -222,6 +225,8 @@ int kaixin_initialize(const char *organization, const char *application, const c
         }
     }
 
+    LI() << "Locale:" << utils::get_current_locale();
+    LI() << "Local i-code:" << utils::get_local_agent_code();
     ix::initNetSystem();
 
     // 加载上次保存的更新令牌
@@ -238,6 +243,7 @@ int kaixin_initialize(const char *organization, const char *application, const c
 // 反初始化
 void kaixin_uninitialize()
 {
+    LI() << "Uninitializing kaixin native SDK.";
     delete g_profile;
     g_profile = nullptr;
 
@@ -256,6 +262,7 @@ int kaixin_sign_in(const char *username, const char *password)
         return EINVAL;
     }
 
+    LI() << "Signing in" << username;
     kaixin::string_map form{
         { "username", username },
         { "password", password }
@@ -273,6 +280,7 @@ int kaixin_sign_out()
         return EINVAL;
     }
 
+    LI() << "Signing out.";
     g_config->notify.reset();
 
 #ifdef KAIXIN_OS_WINDOWS
@@ -304,6 +312,7 @@ const char *kaixin_get_device_id()
         return g_config->device_id.c_str();
     }
 
+    LI() << "Getting device ID.";
     kaixin::string_map form{
         { "fp", fp::generate_simple_fingerprint() },
     };
@@ -314,6 +323,7 @@ const char *kaixin_get_device_id()
         return 0;
     });
 
+    LI() << "Device ID:" << g_config->device_id;
     return g_config->device_id.c_str();
 }
 
@@ -321,6 +331,7 @@ const char *kaixin_get_device_id()
 // 获取授权
 const kaixin_auth_t *kaixin_get_auth()
 {
+    LI() << "Getting auth.";
     kaixin_auth_t *auth = nullptr;
 
     kaixin::send_request(ix::HttpClient::kGet, "/auth", [&auth](const rapidjson::Value &data)
@@ -413,6 +424,7 @@ const char *kaixin_get_material(const char *type)
     }
 
     // 获取素材
+    LI() << "Getting material" << type;
     kaixin::string_map queries{
         { "locale", utils::get_current_locale() },
     };
@@ -523,6 +535,7 @@ const char *kaixin_get_web_url(kaixin_web_page_t page)
         return nullptr;
     }
 
+    LI() << "Getting URL" << page;
     kaixin::string_map queries{
        { "locale", utils::get_current_locale() },
     };

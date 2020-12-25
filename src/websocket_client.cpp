@@ -82,9 +82,6 @@ websocket_client::websocket_client(kaixin_notification_callback_t callback, void
 
 websocket_client::~websocket_client()
 {
-    delete heartbeat_timer_;
-    delete restart_timer_;
-
     if (registered_)
     {
         // 注销下行通知
@@ -98,11 +95,14 @@ websocket_client::~websocket_client()
 
     ws_->stop();
     delete ws_;
+    delete heartbeat_timer_;
+    delete restart_timer_;
 }
 
 
 void websocket_client::create_socket()
 {
+    LD() << "Creating socket.";
     delete ws_;
     ws_ = new ix::WebSocket;
     //ws_->setExtraHeaders({ {"User-Agent", "kaixin-native/" KAIXIN_VERSION_STRING } });
@@ -187,7 +187,7 @@ void websocket_client::on_register_device_succeeded(const std::string_view &arg)
     heartbeat_timer_->start(interval);
 
     // 注册下行通知
-    LD() << "Registering notifications.";
+    LI() << "Registering notifications.";
     reg_seq_ = post("/notification", {}, {}, { { "x-ca-websocket_api_type", "REGISTER" } });
 }
 
@@ -297,6 +297,7 @@ std::string websocket_client::make_request(const std::string &verb, const std::s
         write(w, "method", verb);
         write(w, "host", get_host(g_config->base_url));
         write(w, "path", path);
+
         w.Key("querys");
         w.StartObject();
         {
@@ -316,6 +317,7 @@ std::string websocket_client::make_request(const std::string &verb, const std::s
             }
         }
         w.EndObject();
+
         w.Key("headers");
         w.StartObject();
         {
