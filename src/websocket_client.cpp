@@ -400,6 +400,7 @@ void websocket_client::handle_response(const std::string &json)
 
 void websocket_client::restart()
 {
+    LD() << "Restarting.";
     ws_->stop();
     ws_->start();
 }
