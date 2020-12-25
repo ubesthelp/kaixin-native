@@ -19,6 +19,7 @@ simple_timer::simple_timer()
     : thread_(nullptr)
     , interval_(0)
     , interrupted_(false)
+    , singleshot_(false)
 {
 }
 
@@ -68,6 +69,12 @@ void simple_timer::timer_proc()
         if (std::chrono::steady_clock::now() >= checkpoint)
         {
             callback_();
+
+            if (singleshot_)
+            {
+                break;
+            }
+
             checkpoint = std::chrono::steady_clock::now() + interval;
         }
     }

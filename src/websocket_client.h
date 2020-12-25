@@ -61,6 +61,9 @@ private:
 
     void handle_response(const std::string &json);
 
+    void restart();
+    void restart_later();
+
 private:
     using command_handler = std::function<void(const std::string_view &)>;
     std::map<std::string, command_handler> handlers_;
@@ -68,6 +71,7 @@ private:
     std::condition_variable cond_;
     ix::WebSocket *ws_;
     simple_timer *heartbeat_timer_;
+    simple_timer *restart_timer_;
     kaixin_notification_callback_t callback_;
     void *user_data_;
     int seq_;

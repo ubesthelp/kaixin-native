@@ -33,6 +33,7 @@ public:
     ~simple_timer();
 
     void set_timeout_callback(timeout_callback callback) { callback_ = callback; }
+    void set_single_shot(bool on) { singleshot_ = on; }
 
     void start(int ms);
     void stop();
@@ -45,4 +46,5 @@ private:
     timeout_callback callback_;
     std::atomic_bool interrupted_;
     int interval_;
+    bool singleshot_;
 };
