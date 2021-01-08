@@ -185,6 +185,8 @@ int send_request(const std::string &verb, const std::string &path, const string_
     if ((resp->statusCode / 100) != 2 || code != 0 || !doc.HasMember("data"))
     {
         // 服务端返回错误
+        auto msg = get<std::string>(doc, "msg");
+        LE() << "Failed to" << verb << path << ":" << resp->statusCode << code << msg;
         return utils::make_int(resp->statusCode, code);
     }
 
