@@ -591,3 +591,12 @@ void kaixin_free_string(const char *s)
 {
     free(const_cast<char *>(s));
 }
+
+
+void kaixin_log(const char *msg)
+{
+    kaixin::string_map form{
+       { "msg", msg },
+    };
+    kaixin::send_request(ix::HttpClient::kPost, "/log", form);
+}

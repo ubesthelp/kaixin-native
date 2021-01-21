@@ -334,6 +334,14 @@ KAIXIN_EXPORT const char *kaixin_get_web_url(kaixin_web_page_t page);
 KAIXIN_EXPORT void kaixin_free_string(const char *s);
 
 
+/*!
+ * \brief       向服务端记录日志。
+ *
+ * \param[in]   msg         要记录的字符串。
+ */
+KAIXIN_EXPORT void kaixin_log(const char *msg);
+
+
 #ifdef __cplusplus
 }       // extern "C"
 #endif
