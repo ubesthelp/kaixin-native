@@ -104,6 +104,7 @@ int main()
         std::cout << "Lowest version: " << lowest.major << "." << lowest.minor << "."
             << lowest.patch << std::endl;
 
+        kaixin_log("This is a test log.");
 
         std::cout << "Getting device ID." << std::endl;
         std::cout << "Device ID: " << kaixin_get_device_id() << std::endl;
