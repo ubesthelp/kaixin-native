@@ -101,7 +101,15 @@ std::string generate_simple_fingerprint()
     writer.Key("ni");
     writer.StartArray();
 
-    for (auto &ni : wmic.query(L"NetworkAdapter", L"MACAddress", L"PNPDeviceID like 'PCI\\\\%'"))
+    auto nis = wmic.query(L"NetworkAdapter", L"MACAddress", L"PNPDeviceID like 'PCI\\\\%'");
+
+    if (nis.empty())
+    {
+        // Hyper-V 虚拟机
+        nis = wmic.query(L"NetworkAdapter", L"MACAddress", L"PNPDeviceID like 'VMBUS\\\\%'");
+    }
+
+    for (auto &ni : nis)
     {
         writer.String(md5(ni));
     }
