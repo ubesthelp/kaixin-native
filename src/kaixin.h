@@ -134,34 +134,20 @@ typedef struct kaixin_notification_arguments_s
 } kaixin_notification_arguments_t;
 
 
-/// \brief      Shopee 各站点域名。
-typedef struct kaixin_shopee_hosts_by_website_s
-{
-    const char *tw;                             ///< 台湾站
-    const char *sg;                             ///< 新加坡站
-    const char *id;                             ///< 印尼站
-    const char *th;                             ///< 泰国站
-    const char *my;                             ///< 马来西亚站
-    const char *vn;                             ///< 越南站
-    const char *ph;                             ///< 菲律宾站
-    const char *br;                             ///< 巴西站
-} kaixin_shopee_hosts_by_website_t;
-
-
 /// \brief      Shopee 子域名。
-typedef struct kaixin_shopee_hosts_by_sub_domain_s
+typedef enum kaixin_shopee_hosts_by_sub_domain_e
 {
-    kaixin_shopee_hosts_by_website_t buyer;     ///< 买家子域名
-    kaixin_shopee_hosts_by_website_t seller;    ///< 卖家子域名
-    kaixin_shopee_hosts_by_website_t cdn;       ///< CDN 子域名
+    KAIXIN_SHOPEE_HOSTS_BUYER,                  ///< 买家子域名
+    KAIXIN_SHOPEE_HOSTS_SELLER,                 ///< 卖家子域名
+    KAIXIN_SHOPEE_HOSTS_CDN,                    ///< CDN 子域名
 } kaixin_shopee_hosts_by_sub_domain_t;
 
 
 /// \brief      Shopee 域名。
-typedef struct kaixin_shopee_hosts_s
+typedef enum kaixin_shopee_hosts_e
 {
-    kaixin_shopee_hosts_by_sub_domain_t global; ///< 全球通用域名
-    kaixin_shopee_hosts_by_sub_domain_t china;  ///< 中国大陆用域名
+    KAIXIN_SHOPEE_HOSTS_GLOBAL,                 ///< 全球通用域名
+    KAIXIN_SHOPEE_HOSTS_CHINA,                  ///< 中国大陆用域名
 } kaixin_shopee_hosts_t;
 
 
@@ -311,9 +297,20 @@ KAIXIN_EXPORT int kaixin_set_notification_callback(kaixin_notification_callback_
 /*!
  * \brief       获取 Shopee 域名。
  *
- * \return      Shopee 域名。
+ * \param[in]   website     站点，2 小写字母
+ * \param[in]   hosts       全球/中国
+ * \param[in]   sub         子域名
+ *
+ * \return      Shopee 域名，或 `NULL`。返回的字符串不需要释放。
+ *
+ * \sa          `KAIXIN_SHOPEE_HOSTS_GLOBAL`
+ * \sa          `KAIXIN_SHOPEE_HOSTS_CHINA`
+ * \sa          `KAIXIN_SHOPEE_HOSTS_BUYER`
+ * \sa          `KAIXIN_SHOPEE_HOSTS_SELLER`
+ * \sa          `KAIXIN_SHOPEE_HOSTS_CDN`
  */
-KAIXIN_EXPORT const kaixin_shopee_hosts_t *kaixin_get_shopee_hosts();
+KAIXIN_EXPORT const char *kaixin_get_shopee_hosts(const char *website, kaixin_shopee_hosts_t hosts,
+                                                  kaixin_shopee_hosts_by_sub_domain_t sub);
 
 
 /*!

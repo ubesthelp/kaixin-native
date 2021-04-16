@@ -203,7 +203,6 @@ int kaixin_initialize(const char *organization, const char *application, const c
     LI() << "Initializing kaixin native SDK " KAIXIN_VERSION_STRING ".";
     g_config = new kaixin::Config;
     _ASSERT(g_config != nullptr);
-    memset(&g_config->shopee_hosts, 0, sizeof(g_config->shopee_hosts));
     g_config->organization = organization;
     g_config->application = application;
     g_config->app_key = app_key;
@@ -477,53 +476,68 @@ int kaixin_set_notification_callback(kaixin_notification_callback_t func, void *
 
 
 // Shopee 域名
-static void to_shopee_hosts(const rapidjson::Value &data, kaixin_shopee_hosts_by_website_t *hosts)
+static std::map<std::string, std::string> to_shopee_hosts_sub_domain(const rapidjson::Value &data)
 {
-    using rapidjson::get;
-    hosts->tw = get(data, "tw");
-    hosts->sg = get(data, "sg");
-    hosts->id = get(data, "id");
-    hosts->th = get(data, "th");
-    hosts->my = get(data, "my");
-    hosts->vn = get(data, "vn");
-    hosts->ph = get(data, "ph");
-    hosts->br = get(data, "br");
+    std::map<std::string, std::string> hosts;
+
+    for (auto iter = data.MemberBegin(); iter != data.MemberEnd(); ++iter)
+    {
+        hosts.emplace(iter->name.GetString(), iter->value.GetString());
+    }
+
+    return hosts;
 }
 
-static void to_shopee_hosts(const rapidjson::Value &data, kaixin_shopee_hosts_by_sub_domain_t *hosts)
+static std::map<kaixin_shopee_hosts_by_sub_domain_t, std::map<std::string, std::string>>
+to_shopee_hosts(const rapidjson::Value &data)
 {
-    using rapidjson::get;
-    to_shopee_hosts(data["buyer"], &hosts->buyer);
-    to_shopee_hosts(data["seller"], &hosts->seller);
-    to_shopee_hosts(data["cdn"], &hosts->cdn);
+    std::map<kaixin_shopee_hosts_by_sub_domain_t, std::map<std::string, std::string>> hosts;
+
+    hosts.emplace(KAIXIN_SHOPEE_HOSTS_BUYER, to_shopee_hosts_sub_domain(data["buyer"]));
+    hosts.emplace(KAIXIN_SHOPEE_HOSTS_SELLER, to_shopee_hosts_sub_domain(data["seller"]));
+    hosts.emplace(KAIXIN_SHOPEE_HOSTS_CDN, to_shopee_hosts_sub_domain(data["cdn"]));
+
+    return hosts;
 }
 
-const kaixin_shopee_hosts_t *kaixin_get_shopee_hosts()
+const char *kaixin_get_shopee_hosts(const char *website, kaixin_shopee_hosts_t hosts,
+                                    kaixin_shopee_hosts_by_sub_domain_t sub)
 {
-    if (g_config == nullptr)
+    if (g_config == nullptr || website == nullptr)
     {
         return nullptr;
     }
 
-    if (g_config->shopee_hosts.global.buyer.tw == nullptr)
+    if (g_config->shopee_hosts.empty())
     {
         kaixin::send_request(ix::HttpClient::kGet, "/shopee-hosts", [](const rapidjson::Value &data)
         {
-            std::ostringstream oss;
-            rapidjson::OStreamWrapper buffer(oss);
-            rapidjson::Writer<rapidjson::OStreamWrapper> writer(buffer);
-            data.Accept(writer);
-            g_config->shopee_hosts_json = oss.str();
-
-            rapidjson::Document doc;
-            doc.ParseInsitu(g_config->shopee_hosts_json.data());
-            to_shopee_hosts(doc["global"], &g_config->shopee_hosts.global);
-            to_shopee_hosts(doc["china"], &g_config->shopee_hosts.china);
+            g_config->shopee_hosts.emplace(KAIXIN_SHOPEE_HOSTS_GLOBAL, to_shopee_hosts(data["global"]));
+            g_config->shopee_hosts.emplace(KAIXIN_SHOPEE_HOSTS_CHINA, to_shopee_hosts(data["china"]));
             return 0;
         });
     }
 
-    return &g_config->shopee_hosts;
+    if (g_config->shopee_hosts.count(hosts) == 0)
+    {
+        return nullptr;
+    }
+
+    const auto &hs = g_config->shopee_hosts.at(hosts);
+
+    if (hs.count(sub) == 0)
+    {
+        return nullptr;
+    }
+
+    const auto &subs = hs.at(sub);
+
+    if (subs.count(website) == 0)
+    {
+        return nullptr;
+    }
+
+    return subs.at(website).c_str();
 }
 
 
