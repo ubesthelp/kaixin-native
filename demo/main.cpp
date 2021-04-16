@@ -111,7 +111,7 @@ int main()
 
 
         std::cout << "Getting Shopee hosts." << std::endl;
-        std::cout << "Shopee Taiwan: " << kaixin_get_shopee_hosts()->china.buyer.tw << std::endl;
+        std::cout << "Shopee Taiwan: " << kaixin_get_shopee_hosts("tw", KAIXIN_SHOPEE_HOSTS_CHINA, KAIXIN_SHOPEE_HOSTS_BUYER) << std::endl;
 
 
         std::cout << "Getting buy URL." << std::endl;

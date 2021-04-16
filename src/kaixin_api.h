@@ -45,14 +45,13 @@ struct Config
     std::string agent_code;                     ///< 上级代理编号
     std::string secret;                         ///< 本地对称加密密钥
     std::string device_id;                      ///< 设备 ID
-    std::string shopee_hosts_json;              ///< Shopee 域名 JSON
     std::map<std::string, std::string> materials;       ///< 素材
     std::unique_ptr<simple_timer> token_refresher;      ///< 定期更新令牌
     std::unique_ptr<websocket_client> notify;           ///< 下行通知对象
+    std::map<kaixin_shopee_hosts_t, std::map<kaixin_shopee_hosts_by_sub_domain_t, std::map<std::string, std::string>>> shopee_hosts;    ///< Shopee 域名
     time_t access_token_expires_at = 0;         ///< 访问令牌过期时间
     time_t refresh_token_expires_at = 0;        ///< 更新令牌过期时间
     time_t id_token_expires_at = 0;             ///< 身份令牌过期时间
-    kaixin_shopee_hosts_t shopee_hosts;         ///< Shopee 域名
 };
 
 
