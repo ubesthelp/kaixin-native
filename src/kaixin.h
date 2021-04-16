@@ -130,7 +130,7 @@ typedef struct kaixin_notification_arguments_s
      * \sa      `KAIXIN_ACTION_REFRESH_AUTH`
      * \sa      `KAIXIN_ACTION_SIGN_OUT`
      */
-    const char *action;                         
+    const char *action;
 } kaixin_notification_arguments_t;
 
 
@@ -251,7 +251,7 @@ KAIXIN_EXPORT void kaixin_free_auth(const kaixin_auth_t *auth);
 
 /*!
  * \brief       获取应用最低版本号。
- * 
+ *
  * 如果应用当前版本号低于此版本号，则可能无法正常运行。此时应强制启动升级过程。
  *
  * \note        此函数可在登录前调用。
@@ -309,8 +309,18 @@ KAIXIN_EXPORT int kaixin_set_notification_callback(kaixin_notification_callback_
  * \sa          `KAIXIN_SHOPEE_HOSTS_SELLER`
  * \sa          `KAIXIN_SHOPEE_HOSTS_CDN`
  */
-KAIXIN_EXPORT const char *kaixin_get_shopee_hosts(const char *website, kaixin_shopee_hosts_t hosts,
+KAIXIN_EXPORT const char *kaixin_get_shopee_host(const char *website, kaixin_shopee_hosts_t hosts,
                                                   kaixin_shopee_hosts_by_sub_domain_t sub);
+
+
+/*!
+ * \brief       获取 Shopee 站点列表。
+ *
+ * \return      Shopee 站点列表，每个站点使用 2 小写字母表示，以半角逗号分隔；或 `NULL`。返回的字符串需要释放。
+ *
+ * \sa          `kaixin_free_string`
+ */
+KAIXIN_EXPORT const char *kaixin_get_shopee_websites();
 
 
 /*!
@@ -319,6 +329,8 @@ KAIXIN_EXPORT const char *kaixin_get_shopee_hosts(const char *website, kaixin_sh
  * \param[in]   page        要获取地址的页面。
  *
  * \return      页面地址，不再使用时须调用 `kaixin_free_string` 释放。
+ *
+ * \sa          `kaixin_free_string`
  */
 KAIXIN_EXPORT const char *kaixin_get_web_url(kaixin_web_page_t page);
 

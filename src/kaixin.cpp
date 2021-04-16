@@ -500,8 +500,8 @@ to_shopee_hosts(const rapidjson::Value &data)
     return hosts;
 }
 
-const char *kaixin_get_shopee_hosts(const char *website, kaixin_shopee_hosts_t hosts,
-                                    kaixin_shopee_hosts_by_sub_domain_t sub)
+const char *kaixin_get_shopee_host(const char *website, kaixin_shopee_hosts_t hosts,
+                                   kaixin_shopee_hosts_by_sub_domain_t sub)
 {
     if (g_config == nullptr || website == nullptr)
     {
@@ -538,6 +538,30 @@ const char *kaixin_get_shopee_hosts(const char *website, kaixin_shopee_hosts_t h
     }
 
     return subs.at(website).c_str();
+}
+
+
+const char *kaixin_get_shopee_websites()
+{
+    if (g_config == nullptr)
+    {
+        return nullptr;
+    }
+
+    kaixin_get_shopee_host("tw", KAIXIN_SHOPEE_HOSTS_GLOBAL, KAIXIN_SHOPEE_HOSTS_BUYER);
+
+    const auto &subs = g_config->shopee_hosts.at(KAIXIN_SHOPEE_HOSTS_GLOBAL).at(KAIXIN_SHOPEE_HOSTS_BUYER);
+    std::string websites;
+
+    for (const auto &sub : subs)
+    {
+        websites.append(sub.first);
+        websites.append(",");
+    }
+
+    auto *s = strdup(websites.c_str());
+    s[websites.length() - 1] = '\0';
+    return s;
 }
 
 
