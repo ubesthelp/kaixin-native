@@ -30,7 +30,7 @@ set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS Debug Release)
 set(VCPKG_TARGET_TRIPLET $ENV{VCPKG_DEFAULT_TRIPLET} CACHE STRING "VCPKG Target Triplet to use")
 
 # 开心 C SDK
-project(kaixin VERSION 1.3.0.13)
+project(kaixin VERSION 1.3.1.15)
 
 # 检查是否支持 IPO
 if(POLICY CMP0069)
