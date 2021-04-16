@@ -111,7 +111,10 @@ int main()
 
 
         std::cout << "Getting Shopee hosts." << std::endl;
-        std::cout << "Shopee Taiwan: " << kaixin_get_shopee_hosts("tw", KAIXIN_SHOPEE_HOSTS_CHINA, KAIXIN_SHOPEE_HOSTS_BUYER) << std::endl;
+        std::cout << "Shopee Taiwan: " << kaixin_get_shopee_host("tw", KAIXIN_SHOPEE_HOSTS_CHINA, KAIXIN_SHOPEE_HOSTS_BUYER) << std::endl;
+        auto websites = kaixin_get_shopee_websites();
+        std::cout << "Shopee websites: " << websites << std::endl;
+        kaixin_free_string(websites);
 
 
         std::cout << "Getting buy URL." << std::endl;
