@@ -138,6 +138,7 @@ std::vector<std::string> wmi_client::query(const wchar_t *cls, const wchar_t *fi
     if (result.empty())
     {
         result.emplace_back("0");
+        LW() << "Empty result." << result.size();
     }
 
     return result;
