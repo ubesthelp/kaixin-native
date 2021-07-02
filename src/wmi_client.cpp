@@ -86,7 +86,7 @@ std::vector<std::string> wmi_client::query(const wchar_t *cls, const wchar_t *fi
                                            const wchar_t *cond /*= nullptr*/) const
 {
     assert(cls != nullptr && field != nullptr);
-    std::vector<std::string> result = { "0" };
+    std::vector<std::string> result;
 
     do
     {
@@ -103,7 +103,6 @@ std::vector<std::string> wmi_client::query(const wchar_t *cls, const wchar_t *fi
         HRESULT hr = d->svc->ExecQuery(_bstr_t(L"WQL"), _bstr_t(q.c_str()), WBEM_FLAG_FORWARD_ONLY,
                                        NULL, &spEnum);
         BREAK_ON_FAILURE(hr);
-        result.clear();
 
         for (;;)
         {
@@ -135,6 +134,11 @@ std::vector<std::string> wmi_client::query(const wchar_t *cls, const wchar_t *fi
             }
         }
     } while (false);
+
+    if (result.empty())
+    {
+        result.emplace_back("0");
+    }
 
     return result;
 }
