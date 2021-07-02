@@ -312,7 +312,6 @@ const char *kaixin_get_device_id()
     }
 
     LI() << "Getting device ID.";
-    LI() << "What the fuck?!";
     kaixin::string_map form{
         { "fp", fp::generate_simple_fingerprint() },
     };

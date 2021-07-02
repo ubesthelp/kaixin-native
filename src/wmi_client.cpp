@@ -87,7 +87,6 @@ std::vector<std::string> wmi_client::query(const wchar_t *cls, const wchar_t *fi
 {
     assert(cls != nullptr && field != nullptr);
     std::vector<std::string> result;
-    LI() << "@" << __LINE__;
 
     do
     {
@@ -103,21 +102,17 @@ std::vector<std::string> wmi_client::query(const wchar_t *cls, const wchar_t *fi
         IEnumWbemClassObjectPtr spEnum;
         HRESULT hr = d->svc->ExecQuery(_bstr_t(L"WQL"), _bstr_t(q.c_str()), WBEM_FLAG_FORWARD_ONLY,
                                        NULL, &spEnum);
-        LI() << "@" << __LINE__ << hr;
         BREAK_ON_FAILURE(hr);
-        LI() << "@" << __LINE__;
 
         for (;;)
         {
             IWbemClassObjectPtr spObj;
             ULONG nReturned = 0;
             hr = spEnum->Next(0, 1, &spObj, &nReturned);
-            LI() << "@" << __LINE__ << hr << nReturned;
             BREAK_ON_FAILURE(hr);
 
             if (nReturned == 0)
             {
-                LI() << "@" << __LINE__;
                 break;
             }
 
@@ -129,15 +124,13 @@ std::vector<std::string> wmi_client::query(const wchar_t *cls, const wchar_t *fi
             switch (value.vt)
             {
             case VT_BSTR:
-                LI() << "@" << __LINE__;
                 result.push_back(utils::to_narrow(value.bstrVal));
                 break;
             case VT_I4:
-                LI() << "@" << __LINE__;
                 result.push_back(std::to_string(value.lVal));
                 break;
             default:
-                LI() << "@" << __LINE__ << value.vt;
+                LW() << "Unknown type:" << value.vt;
                 break;
             }
         }
@@ -146,9 +139,7 @@ std::vector<std::string> wmi_client::query(const wchar_t *cls, const wchar_t *fi
     if (result.empty())
     {
         result.emplace_back("0");
-        LI() << "Empty result." << result.size();
     }
 
-    LI() << "Result:" << result.size();
     return result;
 }
