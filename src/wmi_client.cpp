@@ -21,9 +21,14 @@
 #include <locale>
 
  // vaCI:skip+*:nullptr
+#include "logger.h"
 #include "utils.h"
 
-#define BREAK_ON_FAILURE(hr)    if (FAILED(hr)) break
+#define BREAK_ON_FAILURE(hr)    if (FAILED(hr)) { \
+    _com_error err(hr); \
+    LE() << "Failed at" << __LINE__ << hr << err.ErrorMessage(); \
+    break; \
+}
 
 _COM_SMARTPTR_TYPEDEF(IWbemLocator, __uuidof(IWbemLocator));
 _COM_SMARTPTR_TYPEDEF(IWbemServices, __uuidof(IWbemServices));
@@ -81,7 +86,7 @@ std::vector<std::string> wmi_client::query(const wchar_t *cls, const wchar_t *fi
                                            const wchar_t *cond /*= nullptr*/) const
 {
     assert(cls != nullptr && field != nullptr);
-    std::vector<std::string> result;
+    std::vector<std::string> result = { "0" };
 
     do
     {
@@ -98,6 +103,7 @@ std::vector<std::string> wmi_client::query(const wchar_t *cls, const wchar_t *fi
         HRESULT hr = d->svc->ExecQuery(_bstr_t(L"WQL"), _bstr_t(q.c_str()), WBEM_FLAG_FORWARD_ONLY,
                                        NULL, &spEnum);
         BREAK_ON_FAILURE(hr);
+        result.clear();
 
         for (;;)
         {
