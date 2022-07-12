@@ -15,6 +15,9 @@
 #include <openssl/hmac.h>
 #include <ixwebsocket/IXHttpClient.h>
 
+#include <chrono>
+#include <iomanip>
+
 #include "kaixin_version.h"
 #include "logger.h"
 #include "rapidjsonhelpers.h"
@@ -22,6 +25,22 @@
 
 
 kaixin::Config *g_config = nullptr;
+
+static time_t g_serverTime = 0;
+static std::chrono::steady_clock::time_point g_timestamp;
+
+
+time_t kaixin_get_current_time()
+{
+    if (g_serverTime == 0)
+    {
+        return time(nullptr);
+    }
+
+    const auto elapsed = std::chrono::steady_clock::now() - g_timestamp;
+    const auto seconds = std::chrono::duration_cast<std::chrono::seconds>(elapsed);
+    return g_serverTime + seconds.count();
+}
 
 
 namespace kaixin {
@@ -160,6 +179,35 @@ int send_request(const std::string &verb, const std::string &path, const string_
         LD() << resp->payload;
     }
 #endif
+
+    // 分析服务器时间
+    if (g_serverTime == 0)
+    {
+        g_timestamp = std::chrono::steady_clock::now();
+        const auto iter = resp->headers.find("Date");
+
+        if (iter != resp->headers.end())
+        {
+            std::istringstream input(iter->second);
+            input.imbue(std::locale(setlocale(LC_ALL, nullptr)));
+
+            tm t = { 0 };
+            input >> std::get_time(&t, "%a, %e %b %Y %T GMT");
+
+            if (input.fail())
+            {
+                LW() << "Failed to parse date: " << iter->second;
+            }
+            else
+            {
+                g_serverTime = _mkgmtime(&t);
+            }
+        }
+        else
+        {
+            LW() << "No Date in headers.";
+        }
+    }
 
     if (resp->payload.empty())
     {

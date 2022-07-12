@@ -130,6 +130,7 @@ std::vector<std::string> wmi_client::query(const wchar_t *cls, const wchar_t *fi
                 result.push_back(std::to_string(value.lVal));
                 break;
             default:
+                LW() << "Unknown type:" << value.vt;
                 break;
             }
         }

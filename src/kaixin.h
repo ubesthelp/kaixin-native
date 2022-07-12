@@ -351,6 +351,12 @@ KAIXIN_EXPORT void kaixin_free_string(const char *s);
 KAIXIN_EXPORT void kaixin_log(const char *msg);
 
 
+/*!
+ * \brief       获取当前时间，UNIX Epoch。
+ */
+KAIXIN_EXPORT time_t kaixin_get_current_time();
+
+
 #ifdef __cplusplus
 }       // extern "C"
 #endif
