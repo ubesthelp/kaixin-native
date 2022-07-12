@@ -194,10 +194,18 @@ int send_request(const std::string &verb, const std::string &path, const string_
             tm t = { 0 };
             input >> std::get_time(&t, "%a, %e %b %Y %T GMT");
 
-            if (!input.fail())
+            if (input.fail())
+            {
+                LW() << "Failed to parse date: " << iter->second;
+            }
+            else
             {
                 g_serverTime = _mkgmtime(&t);
             }
+        }
+        else
+        {
+            LW() << "No Date in headers.";
         }
     }
 
