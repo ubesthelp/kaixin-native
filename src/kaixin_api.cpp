@@ -192,7 +192,8 @@ int send_request(const std::string &verb, const std::string &path, const string_
             input.imbue(std::locale(setlocale(LC_ALL, nullptr)));
 
             tm t = { 0 };
-            input >> std::get_time(&t, "%a, %e %b %Y %T GMT");
+            // https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Date
+            input >> std::get_time(&t, "%a, %d %b %Y %T GMT");
 
             if (input.fail())
             {
