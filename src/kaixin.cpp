@@ -267,6 +267,11 @@ int kaixin_sign_in(const char *username, const char *password)
         { "password", password }
     };
 
+    // 登录前删除已有 token
+#ifdef KAIXIN_OS_WINDOWS
+    utils::delete_reg_value("kaixin::token");
+#endif
+
     return kaixin::send_request(ix::HttpClient::kPost, "/session", form, sign_in_handler);
 }
 
